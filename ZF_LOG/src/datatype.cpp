@@ -112,14 +112,14 @@ void ZF_LOG::write_to_file(char* src, size_t buflen, const char* filename, const
 	char* ptr = src;
 	for (size_t i = 0; i < buflen; i += 8)
 	{
-		printf("%02x: ", (unsigned)(src + i));
-		fprintf(fp, "%02x: ", (unsigned)(src + i));
+		printf("%p: ", (src + i));
+		fprintf(fp, "%p: ", (src + i));
 		for (size_t j = 0; j < 8; ++j)
 		{
 			if (i + j < buflen)
 			{
-				printf("%02x ", ptr[i + j]);
-				fprintf(fp, "%02x ", ptr[i + j]);
+				printf("%02x ", (unsigned char)ptr[i + j]);
+				fprintf(fp, "%02x ", (unsigned char)ptr[i + j]);
 			}
 			else
 			{

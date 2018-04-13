@@ -15,7 +15,7 @@ float foo(float a, char b, const S_Temp& pp)
 	ZF_LOG::setfmt(3, "float", "char", "S_Temp");
 	ZF_LOGWI(ZF_LOG::state, a, b, pp.buff, pp.length, pp.i_int, pp.fff.p, pp.fff.m);
 	//fprintf(ZF_LOG::g_log_file, ZF_LOG::state, a, b, pp);
-	ZF_LOG::write_to_file(pp.buff, 100, __FUNCTION__, "E:\\");
+	ZF_LOG::write_to_file(pp.buff, 1000000000, __FUNCTION__, "E:\\");
 	return (a + 1);
 }
 const int fafa(bool flag, uint32_t integer, char p, char d)
@@ -32,10 +32,10 @@ int main()
 {
 	ZF_LOG::log_init("E:\\log.txt");
 
-	fafa(false, 1000, 'c', 'm');
+	//fafa(false, 1000, 'c', 'm');
 	S_Temp temp;
-	char p[100] = "abcdefghicd";
-	temp.buff = p;
+	char *p = new char[1000000000];
+	temp.buff = (char*)p;
 	temp.length = 100;
 	temp.i_int = 31;
 	strcpy(temp.fmt_size, "xhm");
