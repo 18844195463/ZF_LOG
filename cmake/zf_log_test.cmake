@@ -23,5 +23,5 @@ set(
     ${ZF_LOG_DIR}/include
 )
 # add target include
-target_link_libraries( ${L_PROJECT_NAME} PUBLIC ${LIB_DEPENDENCES}  ZF_LOG )
+target_link_libraries( ${L_PROJECT_NAME} PUBLIC ${LIB_DEPENDENCES}  zf_log )
 target_include_directories( ${L_PROJECT_NAME} PUBLIC ${INCLUDE_DIRS} )

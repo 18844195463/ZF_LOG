@@ -49,7 +49,7 @@
 #define ZF_LOG_ERROR   5
 #define ZF_LOG_FATAL   6
 #define ZF_LOG_NONE    0xFF
-#define ZF_LOG_XHM_FIRST_PARAM char*
+//#define ZF_LOG_XHM_FIRST_PARAM char*
 
 /* "Current" log level is a compile time check and has no runtime overhead. Log
 * level that is below current log level it said to be "disabled". Otherwise,
@@ -837,7 +837,8 @@ static _ZF_LOG_INLINE void _zf_log_unused(const int dummy, ...) { (void)dummy; }
 #endif
 
 #if ZF_LOG_ENABLED_INFO
-#define ZF_LOGI(ZF_LOG_XHM_FIRST_PARAM, ...) \
+#define ZF_LOG_XHM_FIRST_PARAM char*
+#define ZF_LOGI( ZF_LOG_XHM_FIRST_PARAM , ...) \
 			ZF_LOG_WRITE(ZF_LOG_INFO, _ZF_LOG_TAG, __VA_ARGS__)
 #define ZF_LOGI_AUX(log, ...) \
 			ZF_LOG_WRITE_AUX(log, ZF_LOG_INFO, _ZF_LOG_TAG, __VA_ARGS__)

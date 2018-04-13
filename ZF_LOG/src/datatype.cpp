@@ -78,25 +78,29 @@ void ZF_LOG::setfmt(int count, ...)
 	//return wanted;
 }
 
-
-void ZF_LOG::write_to_file(char* src, size_t buflen, const char* filename)
+void ZF_LOG::write_to_file(char* src, size_t buflen, const char* filename, const char* dst_plate)
 {
 	char file_name[100] = { 0 };
 	if (!filename)
 		return;
-	strcat(file_name, "E:\\");
-	strcat(file_name, filename);
+	if (!dst_plate)
+		return;
+	strcat(file_name, dst_plate);
 	SYSTEMTIME st;
 	GetLocalTime(&st);
-	char hour[10];
-	char minute[10];
-	char second[10];
+	char hour[20];
+	char minute[20];
+	char second[20];
+	char wsecond[20];
 	sprintf(hour, "%hu", st.wHour);
 	sprintf(minute, "%hu", st.wMinute);
 	sprintf(second, "%hu", st.wSecond);
+	sprintf(wsecond, "%hu", st.wMilliseconds);
 	strcat(file_name, hour);
 	strcat(file_name, minute);
 	strcat(file_name, second);
+	strcat(file_name, wsecond);
+	strcat(file_name, filename);
 	std::cout << file_name;
 	FILE *fp;
 	if ((fp = fopen(file_name, "w")) == NULL) {
