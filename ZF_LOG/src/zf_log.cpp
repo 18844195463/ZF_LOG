@@ -726,7 +726,7 @@ static unsigned g_tcache_mode = TCACHE_STALE;
 static struct timeval g_tcache_tv = { 0, 0 };
 static struct tm g_tcache_tm = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
-static INLINE int tcache_get(const struct timeval *const tv, struct tm *const tm)
+INLINE int tcache_get(const struct timeval *const tv, struct tm *const tm)
 {
 	unsigned mode;
 	mode = __atomic_load_n(&g_tcache_mode, __ATOMIC_RELAXED);
@@ -748,7 +748,7 @@ static INLINE int tcache_get(const struct timeval *const tv, struct tm *const tm
 	return 0;
 }
 
-static INLINE void tcache_set(const struct timeval *const tv, struct tm *const tm)
+INLINE void tcache_set(const struct timeval *const tv, struct tm *const tm)
 {
 	unsigned stale = TCACHE_STALE;
 	if (__atomic_compare_exchange_n(&g_tcache_mode, &stale, TCACHE_FLUID,
