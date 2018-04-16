@@ -9,6 +9,8 @@
 #else
 	#include <unistd.h>
 	#include <sys/time.h>
+	extern inline int tcache_get(const struct timeval *const tv, struct tm *const tm);
+	extern inline void tcache_set(const struct timeval *const tv, struct tm *const tm);
 #endif
 //# define ZF_LOGPUT(...) \
 	//ZF_LOGI(state, __VA_ARGS__)
@@ -19,6 +21,7 @@ namespace ZF_LOG
 	char* getUserDefinedType(char* str);
 	char* get_type(char* type);
 }
+
 
 char* ZF_LOG::getUserDefinedType(char* str)
 {
@@ -78,20 +81,26 @@ void ZF_LOG::setfmt(int count, ...)
 	//return wanted;
 }
 
+
+
 void ZF_LOG::write_to_file(char* src, size_t buflen, const char* filename, const char* dst_plate)
 {
-	char file_name[100] = { 0 };
+	char file_name[FILENAME_MAX] = { 0 };
 	if (!filename)
 		return;
 	if (!dst_plate)
 		return;
 	strcat(file_name, dst_plate);
-	SYSTEMTIME st;
-	GetLocalTime(&st);
+
 	char hour[20];
 	char minute[20];
 	char second[20];
 	char wsecond[20];
+
+#if defined(_WIN32) || defined(_WIN64)
+	SYSTEMTIME st;
+	GetLocalTime(&st);
+
 	sprintf(hour, "%hu", st.wHour);
 	sprintf(minute, "%hu", st.wMinute);
 	sprintf(second, "%hu", st.wSecond);
@@ -101,8 +110,31 @@ void ZF_LOG::write_to_file(char* src, size_t buflen, const char* filename, const
 	strcat(file_name, second);
 	strcat(file_name, wsecond);
 	strcat(file_name, filename);
-	std::cout << file_name;
+	
+#else // unix like system
+	struct timeval tv;
+	gettimeofday(&tv, 0);
+	struct tm tm;
+
+	if (!tcache_get(&tv, &tm))
+	{
+		localtime_r(&tv.tv_sec, &tm);
+		tcache_set(&tv, &tm);
+	}
+
+	sprintf(hour, "%hu", tm.tm_hour);
+	sprintf(minute, "%hu", tm.tm_min);
+	sprintf(second, "%hu", tm.tm_sec);
+	sprintf(wsecond, "%hu", (unsigned)tv.tv_usec / 1000);
+	strcat(file_name, hour);
+	strcat(file_name, minute);
+	strcat(file_name, second);
+	strcat(file_name, wsecond);
+	strcat(file_name, filename);
+#endif
+
 	FILE *fp;
+	std::cout << file_name;
 	if ((fp = fopen(file_name, "w")) == NULL) {
 		printf("File cannot be opened\n");
 		//exit(0);
