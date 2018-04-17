@@ -18,7 +18,7 @@ typedef struct Temp
 	char fmt_size[MAX_STRING_SIZE];
 	static char* tostring()
 	{
-		char* p = " S_TEMP:{buff:%s, length:%d, i_int:%d, fff:{p:%c, m:%d}} ";
+		char* p = " S_TEMP:{buff:%p, length:%d, i_int:%d, fff:{p:%c, m:%d}} ";
 		return p;
 	}
 }S_Temp;

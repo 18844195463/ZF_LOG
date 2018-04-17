@@ -92,6 +92,8 @@ void ZF_LOG::write_to_file(char* src, size_t buflen, const char* filename, const
 		return;
 	strcat(file_name, dst_plate);
 
+	char month[20];
+	char day[20];
 	char hour[20];
 	char minute[20];
 	char second[20];
@@ -101,10 +103,14 @@ void ZF_LOG::write_to_file(char* src, size_t buflen, const char* filename, const
 	SYSTEMTIME st;
 	GetLocalTime(&st);
 
+	sprintf(month, "%hu", st.wMonth);
+	sprintf(day, "%hu", st.wDay);
 	sprintf(hour, "%hu", st.wHour);
 	sprintf(minute, "%hu", st.wMinute);
 	sprintf(second, "%hu", st.wSecond);
 	sprintf(wsecond, "%hu", st.wMilliseconds);
+	strcat(file_name, month);
+	strcat(file_name, day);
 	strcat(file_name, hour);
 	strcat(file_name, minute);
 	strcat(file_name, second);
@@ -122,10 +128,14 @@ void ZF_LOG::write_to_file(char* src, size_t buflen, const char* filename, const
 		tcache_set(&tv, &tm);
 	}
 
+	sprintf(month, "%hu", tm.tm_mon);
+	sprintf(hour, "%hu", tm.tm_mday);
 	sprintf(hour, "%hu", tm.tm_hour);
 	sprintf(minute, "%hu", tm.tm_min);
 	sprintf(second, "%hu", tm.tm_sec);
 	sprintf(wsecond, "%hu", (unsigned)tv.tv_usec / 1000);
+	strcat(file_name, month);
+	strcat(file_name, day);
 	strcat(file_name, hour);
 	strcat(file_name, minute);
 	strcat(file_name, second);
@@ -142,26 +152,19 @@ void ZF_LOG::write_to_file(char* src, size_t buflen, const char* filename, const
 	else
 		printf("File opened for writing\n");
 	char* ptr = src;
-	for (size_t i = 0; i < buflen; i += 8)
-	{
-		printf("%p: ", (src + i));
-		fprintf(fp, "%p: ", (src + i));
-		for (size_t j = 0; j < 8; ++j)
-		{
-			if (i + j < buflen)
-			{
-				printf("%02x ", (unsigned char)ptr[i + j]);
-				fprintf(fp, "%02x ", (unsigned char)ptr[i + j]);
-			}
-			else
-			{
-				fprintf(fp, " ");
-				printf(" ");
-			}
-		}
-		fprintf(fp, "\n");
-		printf("\n");
-		fflush(fp);
-	}
+	for(int i = 0; i < buflen; ++i)
+		fprintf(fp, "%c", (unsigned char)ptr[i]);
+	fflush(fp);
+	//for (size_t i = 0; i < buflen; i += 64)
+	//{
+	//	for (size_t j = 0; j < 64; ++j)
+	//	{
+	//		if (i + j < buflen)
+	//		{
+	//			fprintf(fp, "%c", (unsigned char)ptr[i + j]);
+	//		}
+	//	}
+	//	fflush(fp);
+	//}
 	fclose(fp);
 }

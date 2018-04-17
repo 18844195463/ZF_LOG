@@ -1049,6 +1049,8 @@ static INLINE char *put_uint(unsigned v, const unsigned w, const char wc,
 static void put_ctx(zf_log_message *const msg)
 {
 	_PP_MAP(_ZF_LOG_MESSAGE_FORMAT_INIT, ZF_LOG_MESSAGE_CTX_FORMAT)
+		//_PP_CONCAT_2(_PP_MAP_, _PP_NARGS ZF_LOG_MESSAGE_CTX_FORMAT) (_ZF_LOG_MESSAGE_FORMAT_INIT, ZF_LOG_MESSAGE_CTX_FORMAT)
+		
 #if !_ZF_LOG_MESSAGE_FORMAT_FIELDS(ZF_LOG_MESSAGE_CTX_FORMAT)
 		VAR_UNUSED(msg);
 #else

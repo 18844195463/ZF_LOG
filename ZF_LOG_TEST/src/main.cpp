@@ -10,29 +10,24 @@
 #include <stdlib.h>
 #include "logapi.h"
 #include "datatype.h"
+#include "readfromlog.h"
 float foo(float a, char b, const S_Temp& pp)
 {
-	ZF_LOG::setfmt(3, "float", "char", "S_Temp");
-	ZF_LOGWI(ZF_LOG::state, a, b, pp.buff, pp.length, pp.i_int, pp.fff.p, pp.fff.m);
-	//fprintf(ZF_LOG::g_log_file, ZF_LOG::state, a, b, pp);
-	ZF_LOG::write_to_file(pp.buff, 100, __FUNCTION__, "./");
 	return (a + 1);
 }
 const int fafa(bool flag, uint32_t integer, char p, char d)
 {
-	ZF_LOG::setfmt(4, "bool", "uint32", "char", "char");
-	ZF_LOGWI(ZF_LOG::state, flag, integer, p, d);
-	char* ps = "hello world";
-	ZF_LOG::write_to_file(ps, 12, __FUNCTION__, "./");
-	ZF_LOG::setfmt(1, "int");
-	ZF_LOGWI(ZF_LOG::state, 10);
 	return 10;
 }
 int main()
 {
-	ZF_LOG::log_init("./log.txt");
-
-	//fafa(false, 1000, 'c', 'm');
+	ZF_LOG::log_init("E:\\log.txt");
+	ZF_LOG::setfmt(4, "bool", "uint32", "char", "char");
+	ZF_LOGWI(ZF_LOG::state, false, 1000, 'c', 'm');
+	int t = fafa(false, 1000, 'c', 'm');
+	char* ps = "daawflkmdcldalwdnwnfnasda;das";
+	ZF_LOG::write_to_file(ps, 24000, __FUNCTION__, "E:\\");
+	ZF_LOGWI(ZF_LOG::state, t);
 	S_Temp temp;
 	char *p = new char[100];
 	temp.buff = (char*)p;
@@ -41,7 +36,15 @@ int main()
 	strcpy(temp.fmt_size, "xhm");
 	temp.fff.m = 10;
 	temp.fff.p = 'a';
+	ZF_LOG::setfmt(3, "float", "char", "S_Temp");
+	ZF_LOGWI(ZF_LOG::state, 1.1, 'm', temp.buff, temp.length, temp.i_int, temp.fff.p, temp.fff.m);
 	foo(1.1, 'm', temp);
-    return 0;
+	ZF_LOG::read_init();
+	ZF_LOG::ReadType rtp = ZF_LOG::read_next();
+	int size = 0;
+	unsigned char* fp = ZF_LOG::read_memory(rtp, "E:\\", size);
+	ZF_LOG::read_uninit();
+	system("pause");
+	return 0;
 }
 

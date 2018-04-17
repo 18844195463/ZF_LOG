@@ -11,8 +11,10 @@ namespace ZF_LOG
 	void log_init(char* file_name);
 	void setfmt(int count, ...);
 	void write_to_file(char* src, size_t buflen, const char* filename, const char* dst_plate);
+	void file_output_close(void);
 	extern char state[];
-	extern FILE *g_log_file;
+	extern FILE * g_log_file;
+	extern char log_file_name[100];
 }
 
 #endif
