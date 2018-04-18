@@ -18,12 +18,11 @@ namespace ZF_LOG
 		string second;
 		string millonsec;
 		string process;
-		string thread;
+		string rand;
 		char debug_info;
 		string func_name;
 		string func_file;
 		string line;
-		int randnum;
 		string param_num;
 		string param[MAX_PARAM_NUM];
 	};

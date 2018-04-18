@@ -1,10 +1,11 @@
 #pragma once
-#pragma once
 #ifndef _ZF_LOG_H_
 #define _ZF_LOG_H_
 #include "datatype.h"
 #include "logapi.h"
-# define MAX_STRING_SIZE_ALL 600
+extern int allrand;
+#define __FILERAND__ allrand
+#define MAX_STRING_SIZE_ALL 600
 /* To detect incompatible changes you can define ZF_LOG_VERSION_REQUIRED to be
 * the current value of ZF_LOG_VERSION before including this file (or via
 * compiler command line):

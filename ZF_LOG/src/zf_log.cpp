@@ -5,6 +5,7 @@
 */
 #include "zf_log.h"
 #include <stdlib.h>
+int allrand = 1;
 #ifdef ZF_LOG_USE_ANDROID_LOG
 #undef ZF_LOG_USE_ANDROID_LOG
 #if defined(__ANDROID__)
@@ -811,13 +812,23 @@ static void pid_callback(int *const pid, int *const tid)
 	VAR_UNUSED(tid);
 #else
 #if defined(_WIN32) || defined(_WIN64)
-	*tid = GetCurrentThreadId();
+	allrand++;
+	*tid = allrand;
+	//*tid = rand();
+	//allrand = *tid;
 #elif defined(__ANDROID__)
-	*tid = gettid();
+	allrand++;
+	*tid = allrand;
+	//*tid = gettid();
 #elif defined(__linux__)
-	*tid = syscall(SYS_gettid);
+	allrand++;
+	*tid = allrand;
+	//*tid = syscall(SYS_gettid);
 #elif defined(__MACH__)
-	*tid = (int)pthread_mach_thread_np(pthread_self());
+	allrand++;
+	*tid = allrand;
+	//*tid = rand();
+	//allrand = *tid;
 #else
 #define Platform not supported
 #endif

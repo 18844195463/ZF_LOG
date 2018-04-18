@@ -1,7 +1,7 @@
 #include <iostream>
 #include "zf_log.h"
 #include "datatype.h"
-#include <string.h>
+#include <string>
 #include <stdarg.h>
 #include <fstream>
 using namespace std;
@@ -84,11 +84,11 @@ void ZF_LOG::setfmt(int count, ...)
 
 
 
-void ZF_LOG::write_to_file(char* src, long buflen, const char* filename, const char* dst_plate)
+void ZF_LOG::write_to_file(char* src, long buflen, int filerand, const char* dst_plate)
 {
+	int filerand__ = __FILERAND__;
+	
 	char file_name[FILENAME_MAX] = { 0 };
-	if (!filename)
-		return;
 	if (!dst_plate)
 		return;
 	strcat(file_name, dst_plate);
@@ -115,9 +115,18 @@ void ZF_LOG::write_to_file(char* src, long buflen, const char* filename, const c
 	strcat(file_name, day);
 	strcat(file_name, hour);
 	strcat(file_name, minute);
-	strcat(file_name, second);
-	strcat(file_name, wsecond);
-	strcat(file_name, filename);
+	//strcat(file_name, second);
+	//strcat(file_name, wsecond);
+	char str[100];
+	int index = 0;
+	while (filerand > 0)
+	{
+		str[index++] = filerand %10+48;
+		filerand = filerand / 10;
+	}
+	str[index] = 0;
+	strrev(str);
+	strcat(file_name, str);
 	
 #else // unix like system
 	struct timeval tv;
@@ -140,9 +149,18 @@ void ZF_LOG::write_to_file(char* src, long buflen, const char* filename, const c
 	strcat(file_name, day);
 	strcat(file_name, hour);
 	strcat(file_name, minute);
-	strcat(file_name, second);
-	strcat(file_name, wsecond);
-	strcat(file_name, filename);
+	//strcat(file_name, second);
+	//strcat(file_name, wsecond);
+	char str[100];
+	int index = 0;
+	while (filerand > 1)
+	{
+		str[index++] = filerand % 10;
+		filerand = filerand % 10;
+	}
+	str[index] = 0;
+	strrev(str);
+	strcat(file_name, str);
 #endif
 
 	/*FILE *fp;*/

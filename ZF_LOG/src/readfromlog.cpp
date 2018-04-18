@@ -140,27 +140,27 @@ char* ZF_LOG::read_memory(const ReadType& rtp, int& size)
 		minute.push_back(rtp.minute[i]);
 		str.push_back(rtp.minute[i]);
 	}
-	for (int i = 0; i < rtp.second.size(); ++i)
+	//for (int i = 0; i < rtp.second.size(); ++i)
+	//{
+	//	if (rtp.second[i] == '0' && second.empty())
+	//	{
+	//		continue;
+	//	}
+	//	second.push_back(rtp.second[i]);
+	//	str.push_back(rtp.second[i]);
+	//}
+	//for (int i = 0; i < rtp.millonsec.size(); ++i)
+	//{
+	//	if (rtp.millonsec[i] == '0' && millonsec.empty())
+	//	{
+	//		continue;
+	//	}
+	//	millonsec.push_back(rtp.millonsec[i]);
+	//	str.push_back(rtp.millonsec[i]);
+	//}
+	for (int i = 0; i < rtp.rand.size(); ++i)
 	{
-		if (rtp.second[i] == '0' && second.empty())
-		{
-			continue;
-		}
-		second.push_back(rtp.second[i]);
-		str.push_back(rtp.second[i]);
-	}
-	for (int i = 0; i < rtp.millonsec.size(); ++i)
-	{
-		if (rtp.millonsec[i] == '0' && millonsec.empty())
-		{
-			continue;
-		}
-		millonsec.push_back(rtp.millonsec[i]);
-		str.push_back(rtp.millonsec[i]);
-	}
-	for (int i = 0; i < rtp.func_name.size(); ++i)
-	{
-		str.push_back(rtp.func_name[i]);
+		str.push_back(rtp.rand[i]);
 	}
 	char file_name[100];
 	int index = 0;
@@ -208,7 +208,7 @@ ZF_LOG::ReadType ZF_LOG::read_next()
 
 	char line[LINE_MAX_CHAR_NUM] = { 0 };		//保存读取log.txt中的每行数据, 保存在line数组中
 	readfile.getline(line, LINE_MAX_CHAR_NUM);
-	typedef enum { MONTH, DAY, HOUR, MINUTE, SECOND, MILLSECOND, PROCESS, THREAD, DEBUG_INFO, FUNC_NAME, FUNC_FILE, LINE, RANDNUM} Logbinfile_Member;
+	typedef enum { MONTH, DAY, HOUR, MINUTE, SECOND, MILLSECOND, PROCESS, RANDNUM, DEBUG_INFO, FUNC_NAME, FUNC_FILE, LINE} Logbinfile_Member;
 	bool flag[MEMBER_COUNT_OF_LOGBINFILE + 1];	
 	for (int i = 0; i < MEMBER_COUNT_OF_LOGBINFILE + 1; ++i)
 		flag[i] = true;
@@ -290,9 +290,9 @@ ZF_LOG::ReadType ZF_LOG::read_next()
 				continue;
 			}
 
-			if (temp.thread.empty() || flag[Logbinfile_Member::THREAD])
+			if (temp.rand.empty() || flag[Logbinfile_Member::RANDNUM])
 			{
-				temp.thread.push_back(line[line_index++]);
+				temp.rand.push_back(line[line_index++]);
 				continue;
 			}
 
