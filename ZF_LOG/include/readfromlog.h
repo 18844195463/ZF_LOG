@@ -1,6 +1,7 @@
 #pragma once
 #ifndef _READFROMLOG_H_
 #define _READFROMLOG_H_
+#define MAX_PARAM_NUM 10			//所有使用日志模块的接口中， 最大可能的参数数量
 #include <iostream>
 #include <logapi.h>
 #include <string>
@@ -22,24 +23,21 @@ namespace ZF_LOG
 		string func_name;
 		string func_file;
 		string line;
+		int randnum;
 		string param_num;
-		string param[10];
+		string param[MAX_PARAM_NUM];
 	};
 	class ReadLog
 	{
 	public:
 		ReadLog();
 		void read_log();
-		void read_all(vector <ReadType>& type);
-	private:
-		FILE *log_file;
-		char file_name[100];
-	public:
-		static unsigned char* memory_src;
+		char file_name[_MAX_PATH];
+		static char* memory_src;
 	};
 	void read_init();
-	unsigned char* read_memory(const ReadType& rtp, const char* dst_plate, int& size);
+	char* read_memory(const ReadType& rtp, int& size);
 	void read_uninit();
-	ReadType& read_next();
+	ReadType read_next();
 }
 #endif

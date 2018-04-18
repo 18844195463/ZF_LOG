@@ -3,78 +3,102 @@
 #include <fstream>
 #include <string>
 #include <climits>
-#define UINT32_MAX_INT UINT32_MAX
+#define LINE_MAX_CHAR_NUM 100
+#define MEMBER_COUNT_OF_LOGBINFILE 13 
+#define MAX_MEMORY_CONTENT 1000000
 using namespace std;
-static std::vector <ZF_LOG::ReadType> type;
-static std::vector<ZF_LOG::ReadType>::iterator iter;
-unsigned char* ZF_LOG::ReadLog::memory_src = NULL;
+char* ZF_LOG::ReadLog::memory_src = NULL;
+static ifstream readfile;
 ZF_LOG::ReadLog::ReadLog()
 {
-	//if (ZF_LOG::g_log_file)
-	//{
-	//	std::cout << "please first close the logfile";
-	//	return;
-	//}
 	if (!ZF_LOG::log_file_name)
 	{
 		std::cout << "no file to read";
 		return;
 	}
-	log_file = ZF_LOG::g_log_file;
 	strcpy(file_name, ZF_LOG::log_file_name);
 }
 void ZF_LOG::read_init()
 {
 	ReadLog readlog;
-	readlog.read_all(type);
-	cout << std::endl << std::endl << std::endl;
-	//ReadLog::memory_src = new unsigned char[1000000];
-	/*for (int i = 0; i< type.size(); ++i)
-		std::cout << type[i].month << " " << type[i].day << " " << type[i].hour << " " << type[i].minute << " " << type[i].second << " " << type[i].func_file << " " << type[i].param[3] << std::endl;*/
-}
-ZF_LOG::ReadType& ZF_LOG::read_next()
-{
-	ReadType temp;
-	if (type.empty())
-		return temp;
-	iter = type.begin();
-	return *iter++;
+	readfile.open(readlog.file_name, ios::in);
+	if (!readfile)
+	{
+		printf("cannot open the file %s", readlog.file_name);
+	}
 }
 void ZF_LOG::ReadLog::read_log()
 {
-	//ifstream readfile;
-	//readfile.open(file_name, ios::in);
-	//char a[300];
-	//int i = 0;
-	//while (!readfile.eof())            // 若未到文件结束一直循环 
-	//{
-	//	readfile.getline(a, 300);
-	//	cout << a << endl;
-	//}
-	//readfile.close();
 }
 void ZF_LOG::read_uninit()
 {
 	if (!ReadLog::memory_src)
 		return;
 	delete[] ReadLog::memory_src;
+	if (readfile && readfile.is_open())
+		readfile.close();
 }
-unsigned char* ZF_LOG::read_memory(const ReadType& rtp, const char* dst_plate, int& size)
+char* ZF_LOG::read_memory(const ReadType& rtp, int& size)
 {
 	if (ReadLog::memory_src)
 	{
 		delete[] ReadLog::memory_src;
 		ReadLog::memory_src = NULL;
 	}
-	ReadLog::memory_src = new unsigned char[1000000];
-	if (!dst_plate)
-		return 0;
+	ReadLog::memory_src = new char[MAX_MEMORY_CONTENT];
 	string str;
 	int file_index = 0;
-	while (dst_plate[file_index] != 0)
+	if (ZF_LOG::zlog_path[file_index] == 0)
 	{
-		str.push_back(dst_plate[file_index]);
-		file_index++;
+		if (ZF_LOG::log_file_name[file_index] == 0)
+			cout << "can not open file!" << endl;
+		else
+		{
+			cout << "no file Specified, use default" << endl;
+			#if defined (_WIN32) || defined (_WIN64)
+				char* log_file_name_rev = strrev(ZF_LOG::log_file_name);
+				string tmp;
+				for (int i = 0; i < strlen(log_file_name_rev); ++i)
+				{
+					if (log_file_name_rev[i] != '\\')
+						continue;
+					else
+					{
+						for (int j = i; j < strlen(log_file_name_rev); ++j)
+						{
+							tmp.push_back(log_file_name_rev[j]);
+						}
+					}
+				}
+				reverse(tmp.begin(), tmp.end());
+				cout << tmp;
+				for (int i = 0; i < tmp.size(); ++i)
+					zlog_path[i] = tmp[i];
+			#else
+				char* log_file_name_rev = strrev(ZF_LOG::log_file_name);
+				string tmp;
+				for (int i = 0; i < strlen(log_file_name_rev); ++i)
+				{
+					if (log_file_name_rev[i] == '/')
+						break;
+					else
+					{
+						for (int j = i; j < strlen(log_file_name_rev); ++j)
+						{
+							tmp.push_back(log_file_name_rev[j]);
+						}
+					}
+				}
+				reverse(tmp.begin(), tmp.end());
+				cout << tmp;
+				for (int i = 0; i < tmp.size(); ++i)
+					zlog_path[i] = tmp[i];
+			#endif
+		}
+	}
+	while (ZF_LOG::zlog_path[file_index] != 0)
+	{
+		str.push_back(ZF_LOG::zlog_path[file_index++]);
 	}
 	if (rtp.month.empty())
 		return 0;
@@ -150,7 +174,11 @@ unsigned char* ZF_LOG::read_memory(const ReadType& rtp, const char* dst_plate, i
 	int file_Length = 0;
 	ifstream readfile;
 	readfile.open(file_name, ios::in | ios::binary);
-
+	if (!(readfile && readfile.is_open()))
+	{
+		cout << "file is not open!" << endl;
+		return NULL;
+	}
 	while (!readfile.eof())            // 若未到文件结束一直循环 
 	{
 		unsigned char p;
@@ -162,180 +190,194 @@ unsigned char* ZF_LOG::read_memory(const ReadType& rtp, const char* dst_plate, i
 	size = file_Length;
 	return ReadLog::memory_src;
 }
-void ZF_LOG::ReadLog::read_all(vector<ReadType>& type)
+
+ZF_LOG::ReadType ZF_LOG::read_next()
 {
-	ifstream readfile;
-	readfile.open(file_name, ios::in);
-	char a[300];
-	int i = 0;
-	while (!readfile.eof())            // 若未到文件结束一直循环 
+	ReadType temp;
+	if ( !(readfile && readfile.is_open()) )
 	{
-		readfile.getline(a, 300);
-		cout << a << endl;
-		ReadType temp;
-		int i = 0, index = 1;
-		bool flag[13] = { };
-		for (int i = 0; i < 13; ++i)
-			flag[i] = true;
-		while (a[i] != 0)
+		printf("file is not opened, you get nothing");
+		return temp;
+	}
+	if (readfile.eof())
+	{
+		printf("come to eof, exit, you get nothing");
+		readfile.close();
+		return temp;
+	}
+
+	char line[LINE_MAX_CHAR_NUM] = { 0 };		//保存读取log.txt中的每行数据, 保存在line数组中
+	readfile.getline(line, LINE_MAX_CHAR_NUM);
+	typedef enum { MONTH, DAY, HOUR, MINUTE, SECOND, MILLSECOND, PROCESS, THREAD, DEBUG_INFO, FUNC_NAME, FUNC_FILE, LINE, RANDNUM} Logbinfile_Member;
+	bool flag[MEMBER_COUNT_OF_LOGBINFILE + 1];	
+	for (int i = 0; i < MEMBER_COUNT_OF_LOGBINFILE + 1; ++i)
+		flag[i] = true;
+	int line_index = 0;						//单行索引，指示line中第line_index个数据， 操作读取的每行数据
+	int flag_index = 1;						//flag标志位索引
+	/*
+	* 将line数组中的数据写入到 ReadType 对象中
+	*/
+	while (line[line_index] != '\0')		//未达到字符串结尾
+	{
+		while (line[line_index] != ' ')
 		{
-			while (a[i] != ' ')
+			if (temp.month.empty() || flag[Logbinfile_Member::MONTH])
 			{
-				if (temp.month.empty() || flag[0])
+				if (line[line_index] == '-')
 				{
-					if (a[i] == '-')
-					{
-						flag[0] = false;
-						i++;
-						continue;
-					}
-					temp.month.push_back(a[i++]);
+					flag[Logbinfile_Member::MONTH] = false;
+					line_index++;
 					continue;
 				}
-
-				if (temp.day.empty() || flag[1])
-				{
-					temp.day.push_back(a[i++]);
-					continue;
-				}
-
-				if (temp.hour.empty() || flag[2])
-				{
-					if (a[i] == ':')
-					{
-						flag[2] = false;
-						i++;
-						index++;
-						continue;
-					}
-					temp.hour.push_back(a[i++]);
-					continue;
-				}
-
-				if (temp.minute.empty() || flag[3])
-				{
-					if (a[i] == ':')
-					{
-						flag[3] = false;
-						i++;
-						index++;
-						continue;
-					}
-					temp.minute.push_back(a[i++]);
-					continue;
-				}
-
-				if (temp.second.empty() || flag[4])
-				{
-					if (a[i] == '.')
-					{
-						flag[4] = false;
-						i++;
-						index++;
-						continue;
-					}
-					temp.second.push_back(a[i++]);
-					continue;
-				}
-
-				if (temp.millonsec.empty() || flag[5])
-				{
-					temp.millonsec.push_back(a[i++]);
-					continue;
-				}
-
-				if (temp.process.empty() || flag[6])
-				{
-					temp.process.push_back(a[i++]);
-					continue;
-				}
-
-				if (temp.thread.empty() || flag[7])
-				{
-					temp.thread.push_back(a[i++]);
-					continue;
-				}
-
-				if (flag[8])
-				{
-					temp.debug_info = a[i++];
-					continue;
-				}
-
-				if (temp.func_name.empty() || flag[9])
-				{
-					if (a[i] == '@')
-					{
-						flag[9] = false;
-						i++;
-						index++;
-						continue;
-					}
-					temp.func_name.push_back(a[i++]);
-					continue;
-				}
-
-				if (temp.func_file.empty() || flag[10])
-				{
-					if (a[i] == ':')
-					{
-						flag[10] = false;
-						i++;
-						index++;
-						continue;
-					}
-					temp.func_file.push_back(a[i++]);
-					continue;
-				}
-
-				if (temp.line.empty() || flag[11])
-				{
-					temp.line.push_back(a[i++]);
-					continue;
-				}
-			}
-			if (i > 1 && a[i - 1] == ' ')
-			{
-				i++;
+				temp.month.push_back(line[line_index++]);
 				continue;
 			}
-			i++;
-			flag[index++] = false;
-			if (index == 12)
+
+			if (temp.day.empty() || flag[Logbinfile_Member::DAY])
 			{
-				string rest_str;
-				int backspace_num = 0;
-				for (int j = i; a[j] != 0; ++j)
+				temp.day.push_back(line[line_index++]);
+				continue;
+			}
+
+			if (temp.hour.empty() || flag[Logbinfile_Member::HOUR])
+			{
+				if (line[line_index] == ':')
 				{
-					if (a[j] == ' ')
-						backspace_num++;
-					rest_str.push_back(a[j]);
+					flag[Logbinfile_Member::HOUR] = false;
+					line_index++;
+					flag_index++;
+					continue;
 				}
-				//
-				for (int m = 0; m < backspace_num; ++m)
+				temp.hour.push_back(line[line_index++]);
+				continue;
+			}
+
+			if (temp.minute.empty() || flag[Logbinfile_Member::MINUTE])
+			{
+				if (line[line_index] == ':')
 				{
-					while (a[i] != 0)
+					flag[Logbinfile_Member::MINUTE] = false;
+					line_index++;
+					flag_index++;
+					continue;
+				}
+				temp.minute.push_back(line[line_index++]);
+				continue;
+			}
+
+			if (temp.second.empty() || flag[Logbinfile_Member::SECOND])
+			{
+				if (line[line_index] == '.')
+				{
+					flag[Logbinfile_Member::SECOND] = false;
+					line_index++;
+					flag_index++;
+					continue;
+				}
+				temp.second.push_back(line[line_index++]);
+				continue;
+			}
+
+			if (temp.millonsec.empty() || flag[Logbinfile_Member::MILLSECOND])
+			{
+				temp.millonsec.push_back(line[line_index++]);
+				continue;
+			}
+
+			if (temp.process.empty() || flag[Logbinfile_Member::PROCESS])
+			{
+				temp.process.push_back(line[line_index++]);
+				continue;
+			}
+
+			if (temp.thread.empty() || flag[Logbinfile_Member::THREAD])
+			{
+				temp.thread.push_back(line[line_index++]);
+				continue;
+			}
+
+			if (flag[Logbinfile_Member::DEBUG_INFO])
+			{
+				temp.debug_info = line[line_index++];
+				continue;
+			}
+
+			if (temp.func_name.empty() || flag[Logbinfile_Member::FUNC_NAME])
+			{
+				if (line[line_index] == '@')
+				{
+					flag[Logbinfile_Member::FUNC_NAME] = false;
+					line_index++;
+					flag_index++;
+					continue;
+				}
+				temp.func_name.push_back(line[line_index++]);
+				continue;
+			}
+
+			if (temp.func_file.empty() || flag[Logbinfile_Member::FUNC_FILE])
+			{
+				if (line[line_index] == ':')
+				{
+					flag[Logbinfile_Member::FUNC_FILE] = false;
+					line_index++;
+					flag_index++;
+					continue;
+				}
+				temp.func_file.push_back(line[line_index++]);
+				continue;
+			}
+
+			if (temp.line.empty() || flag[Logbinfile_Member::LINE])
+			{
+				temp.line.push_back(line[line_index++]);
+				continue;
+			}
+			//if (temp.randnum.empty() || flag[Logbinfile_Member::LINE])
+			//{
+			//	temp.randnum.push_back(line[line_index++]);
+			//	continue;
+			//}
+
+		}
+		if (line_index > 1 && line[line_index - 1] == ' ')    //多个空格连起来时，跳过
+		{
+			line_index++;
+			continue;
+		}
+		line_index++;
+		flag[flag_index++] = false;
+		if (flag_index == MEMBER_COUNT_OF_LOGBINFILE-1)		//除 param 中内容，其余部分已经全部读取
+		{
+			string rest_str;
+			int backspace_num = 0;
+			for (int j = line_index; line[j] != 0; ++j)
+			{
+				if (line[j] == ' ')
+					backspace_num++;
+				rest_str.push_back(line[j]);
+			}
+			//
+			for (int m = 0; m < backspace_num; ++m)
+			{
+				while (line[line_index] != 0)
+				{
+					if (line[line_index] == ',')
 					{
-						if (a[i] == ',')
-						{
-							i++;
-							continue;
-						}
-						if (a[i] == ' ')
-						{
-							i++;
-							m++;
-							continue;
-						}
-						temp.param[m].push_back(a[i]);
-						i++;
+						line_index++;
+						continue;
 					}
+					if (line[line_index] == ' ')
+					{
+						line_index++;
+						m++;
+						continue;
+					}
+					temp.param[m].push_back(line[line_index]);
+					line_index++;
 				}
-				//
-				break;
 			}
 		}
-		type.push_back(temp);
 	}
-	readfile.close();
+	return temp;
 }

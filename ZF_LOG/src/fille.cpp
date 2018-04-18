@@ -8,6 +8,7 @@ namespace ZF_LOG
 	void file_output_open(const char *const log_path);
 	void file_output_close(void);
 	FILE *g_log_file;
+	char zlog_path[100] = { 0 };
 	char log_file_name[100] = { 0 };
 }
 void ZF_LOG::file_output_callback(const zf_log_message *msg, void *arg)

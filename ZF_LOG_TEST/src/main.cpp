@@ -22,27 +22,27 @@ const int fafa(bool flag, uint32_t integer, char p, char d)
 int main()
 {
 	ZF_LOG::log_init("E:\\log.txt");
-	ZF_LOG::setfmt(4, "bool", "uint32", "char", "char");
-	ZF_LOGWI(ZF_LOG::state, false, 1000, 'c', 'm');
-	int t = fafa(false, 1000, 'c', 'm');
-	char* ps = "daawflkmdcldalwdnwnfnasda;das";
-	ZF_LOG::write_to_file(ps, 24000, __FUNCTION__, "E:\\");
-	ZF_LOGWI(ZF_LOG::state, t);
 	S_Temp temp;
 	char *p = new char[100];
 	temp.buff = (char*)p;
-	temp.length = 100;
+	temp.length = 100000;
 	temp.i_int = 31;
 	strcpy(temp.fmt_size, "xhm");
 	temp.fff.m = 10;
 	temp.fff.p = 'a';
 	ZF_LOG::setfmt(3, "float", "char", "S_Temp");
 	ZF_LOGWI(ZF_LOG::state, 1.1, 'm', temp.buff, temp.length, temp.i_int, temp.fff.p, temp.fff.m);
+	long ss = 1000;
+	char* a = new char[ss];
+	a[689] = 'a';
+	ZF_LOG::write_to_file(a, ss-1, __FUNCTION__, "E:\\");
 	foo(1.1, 'm', temp);
 	ZF_LOG::read_init();
 	ZF_LOG::ReadType rtp = ZF_LOG::read_next();
+	cout << rtp.minute << rtp.millonsec << rtp.func_name << endl;
 	int size = 0;
-	unsigned char* fp = ZF_LOG::read_memory(rtp, "E:\\", size);
+	char* fp = ZF_LOG::read_memory(rtp, size);
+	ZF_LOG::write_to_file(fp, ss - 1, __FUNCTION__, "E:\\zz\\");
 	ZF_LOG::read_uninit();
 	system("pause");
 	return 0;

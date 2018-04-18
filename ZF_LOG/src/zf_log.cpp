@@ -1266,7 +1266,7 @@ static void _zf_log_write_imp(
 
 void _zf_log_write_d(
 	const char *const func, const char *const file, const unsigned line,
-	const int lvl, const char *const tag,
+	const int lvl, const char *const tag, 
 	const char *const fmt, ...)
 {
 	const src_location src = { func, file, line };

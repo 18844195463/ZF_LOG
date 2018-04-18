@@ -777,7 +777,7 @@ extern "C" {
 			do { \
 				if (ZF_LOG_ON(lvl)) \
 					_zf_log_write_d(_ZF_LOG_SRCLOC_FUNCTION, __FILE__, __LINE__, \
-							lvl, tag, __VA_ARGS__); \
+							lvl, tag,  __VA_ARGS__); \
 			} _ZF_LOG_ONCE
 #define ZF_LOG_WRITE_MEM(lvl, tag, d, d_sz, ...) \
 			do { \
@@ -835,7 +835,6 @@ static _ZF_LOG_INLINE void _zf_log_unused(const int dummy, ...) { (void)dummy; }
 #define ZF_LOGD_MEM(...) _ZF_LOG_UNUSED(__VA_ARGS__)
 #define ZF_LOGD_MEM_AUX(...) _ZF_LOG_UNUSED(__VA_ARGS__)
 #endif
-
 #if ZF_LOG_ENABLED_INFO
 #define ZF_LOG_XHM_FIRST_PARAM char*
 #define ZF_LOGI( ZF_LOG_XHM_FIRST_PARAM , ...) \

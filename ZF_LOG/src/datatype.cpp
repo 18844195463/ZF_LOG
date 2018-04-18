@@ -2,8 +2,9 @@
 #include "zf_log.h"
 #include "datatype.h"
 #include <string.h>
-#include <stdio.h>
 #include <stdarg.h>
+#include <fstream>
+using namespace std;
 #if defined(_WIN32) || defined(_WIN64)
 	#include <windows.h>
 #else
@@ -83,7 +84,7 @@ void ZF_LOG::setfmt(int count, ...)
 
 
 
-void ZF_LOG::write_to_file(char* src, size_t buflen, const char* filename, const char* dst_plate)
+void ZF_LOG::write_to_file(char* src, long buflen, const char* filename, const char* dst_plate)
 {
 	char file_name[FILENAME_MAX] = { 0 };
 	if (!filename)
@@ -91,6 +92,7 @@ void ZF_LOG::write_to_file(char* src, size_t buflen, const char* filename, const
 	if (!dst_plate)
 		return;
 	strcat(file_name, dst_plate);
+	strcpy(zlog_path, dst_plate);
 
 	char month[20];
 	char day[20];
@@ -143,18 +145,25 @@ void ZF_LOG::write_to_file(char* src, size_t buflen, const char* filename, const
 	strcat(file_name, filename);
 #endif
 
-	FILE *fp;
-	std::cout << file_name;
-	if ((fp = fopen(file_name, "w")) == NULL) {
-		printf("File cannot be opened\n");
-		//exit(0);
+	/*FILE *fp;*/
+	//if ((fp = fopen(file_name, "w")) == NULL) {
+	//	printf("File cannot be opened\n");
+	//	//exit(0);
+	//}
+	//else
+	//	printf("File opened for writing\n");
+	ofstream wfile;
+	wfile.open(file_name, ios::out | ios::binary);
+	if (!(wfile && wfile.is_open()))
+	{
+		cout << "file is not open!" << endl;
+		return;
 	}
-	else
-		printf("File opened for writing\n");
 	char* ptr = src;
-	for(int i = 0; i < buflen; ++i)
-		fprintf(fp, "%c", (unsigned char)ptr[i]);
-	fflush(fp);
+	wfile.write(ptr, buflen);
+	//for(int i = 0; i < buflen; ++i)
+	//	fprintf(fp, "%c", (unsigned char)ptr[i]);
+	//fflush(fp);
 	//for (size_t i = 0; i < buflen; i += 64)
 	//{
 	//	for (size_t j = 0; j < 64; ++j)
@@ -166,5 +175,6 @@ void ZF_LOG::write_to_file(char* src, size_t buflen, const char* filename, const
 	//	}
 	//	fflush(fp);
 	//}
-	fclose(fp);
+	//fclose(fp);
+	wfile.close();
 }
