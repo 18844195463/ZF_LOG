@@ -4,6 +4,7 @@
 #include <string>
 #include <stdarg.h>
 #include <fstream>
+#include "logapi.h"
 using namespace std;
 #if defined(_WIN32) || defined(_WIN64)
 	#include <windows.h>
@@ -19,12 +20,12 @@ using namespace std;
 namespace ZF_LOG
 {
 	char state[MAX_STRING_SIZE_ALL] = { 0 };
-	char* getUserDefinedType(char* str);
-	char* get_type(char* type);
+	const char* getUserDefinedType(char* str);
+	const char* get_type(char* type);
 }
 
 
-char* ZF_LOG::getUserDefinedType(char* str)
+const char* ZF_LOG::getUserDefinedType(char* str)
 {
 	if (!strcmp(str, "S_Temp"))
 		return S_Temp::tostring();
@@ -32,7 +33,7 @@ char* ZF_LOG::getUserDefinedType(char* str)
 		return "";
 }
 
-char* ZF_LOG::get_type(char* type)
+const char* ZF_LOG::get_type(char* type)
 {
 	if (type == nullptr)
 		return nullptr;
@@ -56,7 +57,7 @@ char* ZF_LOG::get_type(char* type)
 		return "%d, ";
 	if (!strcmp(type, "*"))
 		return "%p, ";
-	char* str = getUserDefinedType(type);
+	const char* str = getUserDefinedType(type);
 	return str;
 }
 void ZF_LOG::setfmt(int count, ...)
@@ -84,15 +85,12 @@ void ZF_LOG::setfmt(int count, ...)
 
 
 
-void ZF_LOG::write_to_file(char* src, long buflen, int filerand, const char* dst_plate)
+void ZF_LOG::write_to_file(char* src, uint32_t buflen)
 {
-	int filerand__ = __FILERAND__;
+	int filerand = __FILERAND__;
 	
 	char file_name[FILENAME_MAX] = { 0 };
-	if (!dst_plate)
-		return;
-	strcat(file_name, dst_plate);
-	strcpy(zlog_path, dst_plate);
+	strcat(file_name, ZF_LOG::zlog_path);
 
 	char month[20];
 	char day[20];
@@ -194,5 +192,89 @@ void ZF_LOG::write_to_file(char* src, long buflen, int filerand, const char* dst
 	//	fflush(fp);
 	//}
 	//fclose(fp);
+	wfile.close();
+}
+void ZF_LOG::write_to_file_test(char* src, uint32_t buflen, const char* dst_plate)
+{
+	int filerand = __FILERAND__;
+
+	char file_name[FILENAME_MAX] = { 0 };
+	strcat(file_name, dst_plate);
+
+	char month[20];
+	char day[20];
+	char hour[20];
+	char minute[20];
+	char second[20];
+	char wsecond[20];
+
+#if defined(_WIN32) || defined(_WIN64)
+	SYSTEMTIME st;
+	GetLocalTime(&st);
+
+	sprintf(month, "%hu", st.wMonth);
+	sprintf(day, "%hu", st.wDay);
+	sprintf(hour, "%hu", st.wHour);
+	sprintf(minute, "%hu", st.wMinute);
+	sprintf(second, "%hu", st.wSecond);
+	sprintf(wsecond, "%hu", st.wMilliseconds);
+	strcat(file_name, month);
+	strcat(file_name, day);
+	strcat(file_name, hour);
+	strcat(file_name, minute);
+	char str[100];
+	int index = 0;
+	while (filerand > 0)
+	{
+		str[index++] = filerand % 10 + 48;
+		filerand = filerand / 10;
+	}
+	str[index] = 0;
+	strrev(str);
+	strcat(file_name, str);
+
+#else // unix like system
+	struct timeval tv;
+	gettimeofday(&tv, 0);
+	struct tm tm;
+
+	if (!tcache_get(&tv, &tm))
+	{
+		localtime_r(&tv.tv_sec, &tm);
+		tcache_set(&tv, &tm);
+	}
+
+	sprintf(month, "%hu", tm.tm_mon);
+	sprintf(hour, "%hu", tm.tm_mday);
+	sprintf(hour, "%hu", tm.tm_hour);
+	sprintf(minute, "%hu", tm.tm_min);
+	sprintf(second, "%hu", tm.tm_sec);
+	sprintf(wsecond, "%hu", (unsigned)tv.tv_usec / 1000);
+	strcat(file_name, month);
+	strcat(file_name, day);
+	strcat(file_name, hour);
+	strcat(file_name, minute);
+	//strcat(file_name, second);
+	//strcat(file_name, wsecond);
+	char str[100];
+	int index = 0;
+	while (filerand > 1)
+	{
+		str[index++] = filerand % 10;
+		filerand = filerand % 10;
+	}
+	str[index] = 0;
+	strrev(str);
+	strcat(file_name, str);
+#endif
+	ofstream wfile;
+	wfile.open(file_name, ios::out | ios::binary);
+	if (!(wfile && wfile.is_open()))
+	{
+		cout << "file is not open!" << endl;
+		return;
+	}
+	char* ptr = src;
+	wfile.write(ptr, buflen);
 	wfile.close();
 }

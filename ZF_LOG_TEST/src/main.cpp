@@ -30,31 +30,44 @@ int main()
 	strcpy(temp.fmt_size, "xhm");
 	temp.fff.m = 10;
 	temp.fff.p = 'a';
-	ZF_LOG::setfmt(3, "float", "char", "S_Temp");
 
 	long ss = 10000000;
 	char* a = new char[ss];
 	a[689] = 'a';
-
-	ZF_LOG::log_init("E:\\log.txt");
-	ZF_LOGWI(ZF_LOG::state, 1.1, 'm', temp.buff, temp.length, temp.i_int, temp.fff.p, temp.fff.m);
-
-	ZF_LOG::write_to_file(temp.buff, 10000, __FILERAND__, "E:\\");
-
-	//ZF_LOG::write_to_file(a, ss-1, __FILERAND__, "E:\\");
-
-	foo(1.1, 'm', temp);
-
-
+		//ZF_LOG::log_init("E:\\mm\\log.txt");
+	ZF_LOG::log_init("E:\\mm\\log.txt");
 	ZF_LOG::read_init();
-	ZF_LOG::ReadType rtp = ZF_LOG::read_next();
-	cout << rtp.minute << rtp.millonsec << rtp.func_name << endl;
-	int size = 0;
-	char* fp = ZF_LOG::read_memory(rtp, size);
-	if (nullptr != fp)
-	{
-		//ZF_LOG::write_to_file(fp, ss - 1, __FILERAND__, "E:\\zz\\");
-	}
+	ZF_LOG::file_output_close();
+		 {
+			ZF_LOG::log_init("E:\\mm\\log.txt");
+			ZF_LOG::setfmt(3, "float", "char", "S_Temp");
+			ZF_LOGWI(ZF_LOG::state, 1.1, 'm', temp.buff, temp.length, temp.i_int, temp.fff.p, temp.fff.m);
+			ZF_LOG::write_to_file(temp.buff, 10000);
+			ZF_LOG::file_output_close();
+			//ZF_LOG::write_to_file(a, ss-1, __FILERAND__, "E:\\");
+
+			//foo(1.1, 'm', temp);
+
+
+			
+			ZF_LOG::ReadType rtp = ZF_LOG::read_next();
+
+			//cout << rtp.minute << rtp.millonsec << rtp.func_name << endl;
+			if (rtp.day.size() != 0)
+			{
+				int size = 0;
+				char* fp = ZF_LOG::read_memory(rtp, size);
+				ZF_LOG::write_to_file_test(fp, size, "E:\\nn\\");
+			}
+			else
+				ZF_LOG::read_init();
+		}
+		//if (nullptr != fp)
+		//{
+		//	//ZF_LOG::write_to_file(fp, ss - 1, __FILERAND__, "E:\\zz\\");
+		//}
+		//ZF_LOG::read_uninit();
+
 	ZF_LOG::read_uninit();
 	system("pause");
 	return 0;

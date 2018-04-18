@@ -16,9 +16,9 @@ typedef struct Temp
 	int i_int;
 	AA fff;
 	char fmt_size[MAX_STRING_SIZE];
-	static char* tostring()
+	static const char* tostring()
 	{
-		char* p = " S_TEMP:{buff:%p, length:%d, i_int:%d, fff:{p:%c, m:%d}} ";
+		const char* p = " S_TEMP:{buff:%p, length:%d, i_int:%d, fff:{p:%c, m:%d}} ";
 		return p;
 	}
 }S_Temp;

@@ -3,7 +3,7 @@
 #include <fstream>
 #include <string>
 #include <climits>
-#define LINE_MAX_CHAR_NUM 100
+#define LINE_MAX_CHAR_NUM 1000
 #define MEMBER_COUNT_OF_LOGBINFILE 13 
 #define MAX_MEMORY_CONTENT 1000000
 using namespace std;
@@ -22,10 +22,11 @@ void ZF_LOG::read_init()
 {
 	ReadLog readlog;
 	readfile.open(readlog.file_name, ios::in);
-	if (!readfile)
+	if (!readfile.is_open())
 	{
 		printf("cannot open the file %s", readlog.file_name);
 	}
+	//readfile.close();
 }
 void ZF_LOG::ReadLog::read_log()
 {
@@ -55,45 +56,45 @@ char* ZF_LOG::read_memory(const ReadType& rtp, int& size)
 		else
 		{
 			cout << "no file Specified, use default" << endl;
-			#if defined (_WIN32) || defined (_WIN64)
-				char* log_file_name_rev = strrev(ZF_LOG::log_file_name);
-				string tmp;
-				for (int i = 0; i < strlen(log_file_name_rev); ++i)
-				{
-					if (log_file_name_rev[i] != '\\')
-						continue;
-					else
-					{
-						for (int j = i; j < strlen(log_file_name_rev); ++j)
-						{
-							tmp.push_back(log_file_name_rev[j]);
-						}
-					}
-				}
-				reverse(tmp.begin(), tmp.end());
-				cout << tmp;
-				for (int i = 0; i < tmp.size(); ++i)
-					zlog_path[i] = tmp[i];
-			#else
-				char* log_file_name_rev = strrev(ZF_LOG::log_file_name);
-				string tmp;
-				for (int i = 0; i < strlen(log_file_name_rev); ++i)
-				{
-					if (log_file_name_rev[i] == '/')
-						break;
-					else
-					{
-						for (int j = i; j < strlen(log_file_name_rev); ++j)
-						{
-							tmp.push_back(log_file_name_rev[j]);
-						}
-					}
-				}
-				reverse(tmp.begin(), tmp.end());
-				cout << tmp;
-				for (int i = 0; i < tmp.size(); ++i)
-					zlog_path[i] = tmp[i];
-			#endif
+			//#if defined (_WIN32) || defined (_WIN64)
+			//	char* log_file_name_rev = strrev(ZF_LOG::log_file_name);
+			//	string tmp;
+			//	for (int i = 0; i < strlen(log_file_name_rev); ++i)
+			//	{
+			//		if (log_file_name_rev[i] != '\\')
+			//			continue;
+			//		else
+			//		{
+			//			for (int j = i; j < strlen(log_file_name_rev); ++j)
+			//			{
+			//				tmp.push_back(log_file_name_rev[j]);
+			//			}
+			//		}
+			//	}
+			//	reverse(tmp.begin(), tmp.end());
+			//	cout << tmp;
+			//	for (int i = 0; i < tmp.size(); ++i)
+			//		zlog_path[i] = tmp[i];
+			//#else
+			//	char* log_file_name_rev = strrev(ZF_LOG::log_file_name);
+			//	string tmp;
+			//	for (int i = 0; i < strlen(log_file_name_rev); ++i)
+			//	{
+			//		if (log_file_name_rev[i] == '/')
+			//			break;
+			//		else
+			//		{
+			//			for (int j = i; j < strlen(log_file_name_rev); ++j)
+			//			{
+			//				tmp.push_back(log_file_name_rev[j]);
+			//			}
+			//		}
+			//	}
+			//	reverse(tmp.begin(), tmp.end());
+			//	cout << tmp;
+			//	for (int i = 0; i < tmp.size(); ++i)
+			//		zlog_path[i] = tmp[i];
+			//#endif
 		}
 	}
 	while (ZF_LOG::zlog_path[file_index] != 0)
@@ -172,21 +173,21 @@ char* ZF_LOG::read_memory(const ReadType& rtp, int& size)
 	file_name[index] = 0;
 
 	int file_Length = 0;
-	ifstream readfile;
-	readfile.open(file_name, ios::in | ios::binary);
-	if (!(readfile && readfile.is_open()))
+	ifstream read__file;
+	read__file.open(file_name, ios::in | ios::binary);
+	if (!(read__file && read__file.is_open()))
 	{
 		cout << "file is not open!" << endl;
 		return NULL;
 	}
-	while (!readfile.eof())            // 若未到文件结束一直循环 
+	while (!read__file.eof())            // 若未到文件结束一直循环 
 	{
 		unsigned char p;
-		p = readfile.get();
+		p = read__file.get();
 		ReadLog::memory_src[file_Length] = p;
 		file_Length++;
 	}
-	readfile.close();
+	read__file.close();
 	size = file_Length;
 	return ReadLog::memory_src;
 }
@@ -194,20 +195,53 @@ char* ZF_LOG::read_memory(const ReadType& rtp, int& size)
 ZF_LOG::ReadType ZF_LOG::read_next()
 {
 	ReadType temp;
-	if ( !(readfile && readfile.is_open()) )
+	if (!(readfile.is_open()))
 	{
-		printf("file is not opened, you get nothing");
+		cout << "file is not open";
 		return temp;
+	}
+	//if (!readfile)
+	//{
+	//	for (int i = 0; i < 100; i++) {
+	//		printf("close the file..................................\n");
+	//	}
+	//	readfile.close();
+	//}
+	if (readfile.is_open())
+	{
+		cout << "111" << endl;
 	}
 	if (readfile.eof())
 	{
-		printf("come to eof, exit, you get nothing");
+		for (int i = 0; i < 100; i++) {
+			printf("come to eof, exit, you get nothing\n");
+		}
 		readfile.close();
 		return temp;
 	}
-
+	if (readfile.peek() == EOF)
+	{
+		for (int i = 0; i < 100; i++) {
+			printf("come to eof, exit, you get nothing\n");
+		}
+		readfile.close();
+		return temp;
+	}
 	char line[LINE_MAX_CHAR_NUM] = { 0 };		//保存读取log.txt中的每行数据, 保存在line数组中
-	readfile.getline(line, LINE_MAX_CHAR_NUM);
+
+	int index = 0;
+	while (true)
+	{
+		if((line[index++] = readfile.get()) == '\n')
+			break;
+	}
+		
+	//readfile.getline(line, LINE_MAX_CHAR_NUM);
+
+
+
+
+
 	typedef enum { MONTH, DAY, HOUR, MINUTE, SECOND, MILLSECOND, PROCESS, RANDNUM, DEBUG_INFO, FUNC_NAME, FUNC_FILE, LINE} Logbinfile_Member;
 	bool flag[MEMBER_COUNT_OF_LOGBINFILE + 1];	
 	for (int i = 0; i < MEMBER_COUNT_OF_LOGBINFILE + 1; ++i)
@@ -379,5 +413,8 @@ ZF_LOG::ReadType ZF_LOG::read_next()
 			}
 		}
 	}
+	//if (temp.day.size() == 0)
+	//	readfile.close();
+
 	return temp;
 }
