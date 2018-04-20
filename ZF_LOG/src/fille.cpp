@@ -82,7 +82,7 @@ void ZF_LOG::file_output_open(const char *const log_path)
 	strrev(log_file_name_rev);
 #endif
 	atexit(file_output_close);
-	zf_log_set_output_v(ZF_LOG_PUT_STD, 0, file_output_callback);
+
 }
 
 void ZF_LOG::log_init(char* file_name)

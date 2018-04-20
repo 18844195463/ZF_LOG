@@ -1,10 +1,11 @@
 #include <iostream>
-#include "zf_log.h"
 #include "datatype.h"
 #include <string>
 #include <stdarg.h>
 #include <fstream>
 #include "logapi.h"
+#include "loginfo.h"
+#define MAX_STRING_SIZE_ALL 600
 using namespace std;
 #if defined(_WIN32) || defined(_WIN64)
 	#include <windows.h>
@@ -23,8 +24,6 @@ namespace ZF_LOG
 	const char* getUserDefinedType(char* str);
 	const char* get_type(char* type);
 }
-
-
 const char* ZF_LOG::getUserDefinedType(char* str)
 {
 	if (!strcmp(str, "S_Temp"))
@@ -32,31 +31,33 @@ const char* ZF_LOG::getUserDefinedType(char* str)
 	else
 		return "";
 }
-
+//#作为参数分隔符，便于读取
 const char* ZF_LOG::get_type(char* type)
 {
 	if (type == nullptr)
 		return nullptr;
 	if (!strcmp(type, "double"))
-		return "%.4f, ";
+		return "#%.4f, ";
 	if (!strcmp(type, "float"))
-		return "%.2f, ";
+		return "#%.2f, ";
 	if (!strcmp(type, "int32"))
-		return "%d, ";
+		return "#%d, ";
 	if (!strcmp(type, "int64"))
-		return "%d, ";
+		return "#%d, ";
 	if (!strcmp(type, "uint32"))
-		return "%d, ";
+		return "#%d, ";
 	if (!strcmp(type, "uint64"))
-		return "%d, ";
+		return "#%d, ";
 	if (!strcmp(type, "bool"))
-		return "%d, ";
+		return "#%d, ";
 	if (!strcmp(type, "char"))
-		return "%c, ";
+		return "#%c, ";
 	if (!strcmp(type, "int"))
-		return "%d, ";
+		return "#%d, ";
 	if (!strcmp(type, "*"))
-		return "%p, ";
+		return "#%p, ";
+	if (!strcmp(type, "string"))
+		return "#%s, ";
 	const char* str = getUserDefinedType(type);
 	return str;
 }
@@ -82,7 +83,31 @@ void ZF_LOG::setfmt(int count, ...)
 	//strcpy(Log::state, wanted);
 	//return wanted;
 }
-
+void ZF_LOG::writelog(int count, ...)
+{
+	char line[MAX_STRING_SIZE_ALL] = { 0 };
+	state;
+	va_list va;
+	va_start(va, count);
+	vsprintf(line, state, va);
+	va_end(va);
+	cout << line;
+	char str[MAX_STRING_SIZE_ALL] = { 0 };
+	union_string(str);
+	strcat(str, line);
+	int length = 0;
+	for (int i = 0; i < MAX_STRING_SIZE_ALL; ++i)
+	{
+		if (str[i] == 0)
+		{
+			length = i;
+			break;
+		}
+	}
+	str[length++] = '\n';
+	fwrite(str, sizeof(char), length, g_log_file);
+	fflush(g_log_file);
+}
 
 
 void ZF_LOG::write_to_file(char* src, uint32_t buflen)
@@ -100,21 +125,18 @@ void ZF_LOG::write_to_file(char* src, uint32_t buflen)
 	char wsecond[20];
 
 #if defined(_WIN32) || defined(_WIN64)
-	SYSTEMTIME st;
-	GetLocalTime(&st);
-
-	sprintf(month, "%hu", st.wMonth);
-	sprintf(day, "%hu", st.wDay);
-	sprintf(hour, "%hu", st.wHour);
-	sprintf(minute, "%hu", st.wMinute);
-	sprintf(second, "%hu", st.wSecond);
-	sprintf(wsecond, "%hu", st.wMilliseconds);
+	sprintf(month, "%hu", ZF_LOG::tm.month);
+	sprintf(day, "%hu", ZF_LOG::tm.day);
+	sprintf(hour, "%hu", ZF_LOG::tm.hour);
+	sprintf(minute, "%hu", ZF_LOG::tm.minute);
+	sprintf(second, "%hu", ZF_LOG::tm.second);
+	sprintf(wsecond, "%hu", ZF_LOG::tm.millisecond);
 	strcat(file_name, month);
 	strcat(file_name, day);
 	strcat(file_name, hour);
 	strcat(file_name, minute);
-	//strcat(file_name, second);
-	//strcat(file_name, wsecond);
+	strcat(file_name, second);
+	strcat(file_name, wsecond);
 	char str[100];
 	int index = 0;
 	while (filerand > 0)
@@ -209,19 +231,18 @@ void ZF_LOG::write_to_file_test(char* src, uint32_t buflen, const char* dst_plat
 	char wsecond[20];
 
 #if defined(_WIN32) || defined(_WIN64)
-	SYSTEMTIME st;
-	GetLocalTime(&st);
-
-	sprintf(month, "%hu", st.wMonth);
-	sprintf(day, "%hu", st.wDay);
-	sprintf(hour, "%hu", st.wHour);
-	sprintf(minute, "%hu", st.wMinute);
-	sprintf(second, "%hu", st.wSecond);
-	sprintf(wsecond, "%hu", st.wMilliseconds);
+	sprintf(month, "%hu", ZF_LOG::tm.month);
+	sprintf(day, "%hu", ZF_LOG::tm.day);
+	sprintf(hour, "%hu", ZF_LOG::tm.hour);
+	sprintf(minute, "%hu", ZF_LOG::tm.minute);
+	sprintf(second, "%hu", ZF_LOG::tm.second);
+	sprintf(wsecond, "%hu", ZF_LOG::tm.millisecond);
 	strcat(file_name, month);
 	strcat(file_name, day);
 	strcat(file_name, hour);
 	strcat(file_name, minute);
+	strcat(file_name, second);
+	strcat(file_name, wsecond);
 	char str[100];
 	int index = 0;
 	while (filerand > 0)

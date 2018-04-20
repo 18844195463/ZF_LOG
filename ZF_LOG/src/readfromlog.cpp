@@ -141,24 +141,24 @@ char* ZF_LOG::read_memory(const ReadType& rtp, int& size)
 		minute.push_back(rtp.minute[i]);
 		str.push_back(rtp.minute[i]);
 	}
-	//for (int i = 0; i < rtp.second.size(); ++i)
-	//{
-	//	if (rtp.second[i] == '0' && second.empty())
-	//	{
-	//		continue;
-	//	}
-	//	second.push_back(rtp.second[i]);
-	//	str.push_back(rtp.second[i]);
-	//}
-	//for (int i = 0; i < rtp.millonsec.size(); ++i)
-	//{
-	//	if (rtp.millonsec[i] == '0' && millonsec.empty())
-	//	{
-	//		continue;
-	//	}
-	//	millonsec.push_back(rtp.millonsec[i]);
-	//	str.push_back(rtp.millonsec[i]);
-	//}
+	for (int i = 0; i < rtp.second.size(); ++i)
+	{
+		if (rtp.second[i] == '0' && second.empty())
+		{
+			continue;
+		}
+		second.push_back(rtp.second[i]);
+		str.push_back(rtp.second[i]);
+	}
+	for (int i = 0; i < rtp.millonsec.size(); ++i)
+	{
+		if (rtp.millonsec[i] == '0' && millonsec.empty())
+		{
+			continue;
+		}
+		millonsec.push_back(rtp.millonsec[i]);
+		str.push_back(rtp.millonsec[i]);
+	}
 	for (int i = 0; i < rtp.rand.size(); ++i)
 	{
 		str.push_back(rtp.rand[i]);
@@ -387,11 +387,12 @@ ZF_LOG::ReadType ZF_LOG::read_next()
 			int backspace_num = 0;
 			for (int j = line_index; line[j] != 0; ++j)
 			{
-				if (line[j] == ' ')
+				if (line[j] == '#')
 					backspace_num++;
 				rest_str.push_back(line[j]);
 			}
-			//
+			
+			//#作为参数分隔符，便于读取
 			for (int m = 0; m < backspace_num; ++m)
 			{
 				while (line[line_index] != 0)
@@ -401,13 +402,13 @@ ZF_LOG::ReadType ZF_LOG::read_next()
 						line_index++;
 						continue;
 					}
-					if (line[line_index] == ' ')
+					if (line[line_index] == '#')
 					{
 						line_index++;
 						m++;
 						continue;
 					}
-					temp.param[m].push_back(line[line_index]);
+					temp.param[m-1].push_back(line[line_index]);
 					line_index++;
 				}
 			}

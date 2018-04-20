@@ -11,6 +11,7 @@
 #include "logapi.h"
 #include "datatype.h"
 #include "readfromlog.h"
+#include "loginfo.h"
 float foo(float a, char b, const S_Temp& pp)
 {
 	return (a + 1);
@@ -21,7 +22,6 @@ const int fafa(bool flag, uint32_t integer, char p, char d)
 }
 int main()
 {
-
 	char *p = new char[100];
 	S_Temp temp;
 	temp.buff = (char*)p;
@@ -41,7 +41,10 @@ int main()
 		 {
 			ZF_LOG::log_init("E:\\mm\\log.txt");
 			ZF_LOG::setfmt(3, "float", "char", "S_Temp");
-			ZF_LOGWI(ZF_LOG::state, 1.1, 'm', temp.buff, temp.length, temp.i_int, temp.fff.p, temp.fff.m);
+			//ZF_LOG::setfmt(3, "float", "*", "float");
+			ZF_LOG::writelog(10, 1.1, 'm', temp.buff, temp.length, temp.i_int, temp.fff.p, temp.fff.m);
+			//ZF_LOG::writelog(10, 1.1, "sssm", 2.26);
+			//ZF_LOGWI(ZF_LOG::state, 1.1, 'm', temp.buff, temp.length, temp.i_int, temp.fff.p, temp.fff.m);
 			ZF_LOG::write_to_file(temp.buff, 10000);
 			ZF_LOG::file_output_close();
 			//ZF_LOG::write_to_file(a, ss-1, __FILERAND__, "E:\\");
