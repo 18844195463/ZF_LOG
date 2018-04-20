@@ -3,8 +3,8 @@
 #define LOGAPI_H
 
 #include <iostream>
-#include "zf_log.h"
-#define ZF_LOGWI(...) ZF_LOGI(ZF_LOG::state, __VA_ARGS__)
+//#include "zf_log.h"
+//#define ZF_LOGWI(...) ZF_LOGI(ZF_LOG::state, __VA_ARGS__)
 	
 namespace ZF_LOG
 {
