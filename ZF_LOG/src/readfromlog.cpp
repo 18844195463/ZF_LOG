@@ -1,8 +1,10 @@
 #include "readfromlog.h"
 #include "datatype.h"
+#include "zf_log.h"
 #include <fstream>
 #include <string>
 #include <climits>
+#include "logapi.h"
 #define LINE_MAX_CHAR_NUM 1000
 #define MEMBER_COUNT_OF_LOGBINFILE 9
 #define MAX_MEMORY_CONTENT 1000000
@@ -20,7 +22,7 @@ ZF_LOG::ReadLog::ReadLog()
 }
 void ZF_LOG::read_init()
 {
-	ReadLog readlog;
+	ZF_LOG::ReadLog readlog;
 	readfile.open(readlog.file_name, ios::in);
 	if (!readfile.is_open())
 	{
@@ -33,20 +35,20 @@ void ZF_LOG::ReadLog::read_log()
 }
 void ZF_LOG::read_uninit()
 {
-	if (!ReadLog::memory_src)
+	if (!ZF_LOG::ReadLog::memory_src)
 		return;
-	delete[] ReadLog::memory_src;
+	delete[] ZF_LOG::ReadLog::memory_src;
 	if (readfile && readfile.is_open())
 		readfile.close();
 }
-char* ZF_LOG::read_memory(const ReadType& rtp, int& size)
+char* ZF_LOG::read_memory(const ZF_LOG::ReadType& rtp, int& size)
 {
-	if (ReadLog::memory_src)
+	if (ZF_LOG::ReadLog::memory_src)
 	{
-		delete[] ReadLog::memory_src;
-		ReadLog::memory_src = NULL;
+		delete[] ZF_LOG::ReadLog::memory_src;
+		ZF_LOG::ReadLog::memory_src = NULL;
 	}
-	ReadLog::memory_src = new char[MAX_MEMORY_CONTENT];
+	ZF_LOG::ReadLog::memory_src = new char[MAX_MEMORY_CONTENT];
 	string str;
 	int file_index = 0;
 	if (ZF_LOG::zlog_path[file_index] == 0)
@@ -144,17 +146,17 @@ char* ZF_LOG::read_memory(const ReadType& rtp, int& size)
 	{
 		unsigned char p;
 		p = read__file.get();
-		ReadLog::memory_src[file_Length] = p;
+		ZF_LOG::ReadLog::memory_src[file_Length] = p;
 		file_Length++;
 	}
 	read__file.close();
 	size = file_Length;
-	return ReadLog::memory_src;
+	return ZF_LOG::ReadLog::memory_src;
 }
 
 ZF_LOG::ReadType ZF_LOG::read_next()
 {
-	ReadType temp;
+	ZF_LOG::ReadType temp;
 	if (!(readfile.is_open()))
 	{
 		cout << "file is not open";

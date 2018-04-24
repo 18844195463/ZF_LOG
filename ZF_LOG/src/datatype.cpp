@@ -4,7 +4,7 @@
 #include <fstream>
 #include <boost/any.hpp>
 #include <sstream>
-#include "logapi.h"
+#include "zf_log.h"
 #include "loginfo.h"
 #include "datatype.h"
 #define MAX_STRING_SIZE_ALL 600
@@ -43,7 +43,7 @@ void ZF_LOG::writelog(int line, const char* file, Type type, const char* str)
 	fwrite(aline, sizeof(char), help, g_log_file);
 	fflush(g_log_file);
 }
-void ZF_LOG::writelog(int line, const char* file, Type type, void* buf, uint32_t size)
+void ZF_LOG::writelog(int line, const char* file, ZF_LOG::Type type, void* buf, uint32_t size)
 {
 	string lines;
 	union_string(line, file, lines);
@@ -194,7 +194,7 @@ void ZF_LOG::write_to_file(char* src, uint32_t buflen)
 {
 	int filerand = __FILERAND__;
 	void* buf = src;
-	WRITELOG(ZF_LOG::Type::Buffer, buf, buflen );
+	zf_write_log(ZF_LOG::Type::Buffer, buf, buflen );
 	char file_name[FILENAME_MAX] = { 0 };
 	strcat(file_name, ZF_LOG::zlog_path);
 

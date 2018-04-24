@@ -1,8 +1,8 @@
-#pragma once
+
 #ifndef _READFROMLOG_H_
 #define _READFROMLOG_H_
 #include <iostream>
-#include <logapi.h>
+#include <boost/any.hpp>
 #include <string>
 #include <vector>
 using namespace std;

@@ -87,6 +87,6 @@ void ZF_LOG::file_output_open(const char *const log_path)
 
 void ZF_LOG::log_init(char* file_name)
 {
-	file_output_open(file_name);
+	ZF_LOG::file_output_open(file_name);
 }
 

@@ -4,7 +4,6 @@
 #define __FILERAND__ ZF_LOG::allrand
 #define MAX_STRING_SIZE 100
 #include <iostream>
-#define WRITELOG( ... ) ZF_LOG::writelog( __LINE__, __FUNCTION__, __VA_ARGS__)
 struct AA
 {
 	char p;

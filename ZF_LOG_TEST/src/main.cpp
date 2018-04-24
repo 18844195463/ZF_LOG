@@ -9,10 +9,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <boost/any.hpp>
-#include "logapi.h"
+#include "zf_log.h"
 #include "datatype.h"
 #include "readfromlog.h"
-#include "loginfo.h"
+
 //#define str(x) #x
 float foo(float a, char b, const S_Temp& pp)
 {
@@ -52,26 +52,26 @@ int bar(std::vector<boost::any>&& some_values)
 
 int main()
 {
-	char *p = new char[100];
-	ZF_LOG::log_init("E:\\mm\\log.txt");
-	ZF_LOG::read_init();
-	WRITELOG(ZF_LOG::Type::Function, "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
-	WRITELOG(ZF_LOG::Type::Input, { "abc", 513, 2.206, 'r', false });
-	//WRITELOG(ZF_LOG::Type::Output, { &p, 2.206, 'r', false });
-	//	ZF_LOG::writebuffer(type::Buffer, buffer);
-	ZF_LOG::write_to_file(p, 10000);
-	ZF_LOG::read_next();
-	ZF_LOG::read_next();
-	ZF_LOG::ReadType rtp = ZF_LOG::read_next();
-	cout << rtp.minute << rtp.millonsec << rtp.func_name << endl;
-			if (rtp.day.size() != 0)
-			{
-				int size = 0;
-				char* fp = ZF_LOG::read_memory(rtp, size);
-				ZF_LOG::write_to_file_test(fp, size, "E:\\nn\\");
-			}
-		ZF_LOG::read_uninit();
+	char* zf_read_memory(const ZF_LOG::ReadType& rtp, int& size);
 
+	char *p = new char[100];
+	zf_log_init("E:\\mm\\log.txt");
+	zf_read_init();
+	zf_write_log(ZF_LOG::Type::Function, "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+	zf_write_log(ZF_LOG::Type::Input, { "abc", 513, 2.206, 'r', false });
+	zf_write_to_file(p, 10000);
+	zf_read_next();
+	zf_read_next();
+	ZF_LOG::ReadType rtp = zf_read_next();
+	cout << rtp.minute << rtp.millonsec << rtp.func_name << endl;
+	if (rtp.day.size() != 0)
+	{
+		int size = 0;
+		char* fp = zf_read_memory(rtp, size);
+		zf_write_to_file_test(fp, size, "E:\\nn\\");
+	}
+	zf_read_uninit();
+	zf_log_uninit();
 	return 0;
 }
 
