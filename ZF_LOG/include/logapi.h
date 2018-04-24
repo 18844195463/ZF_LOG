@@ -3,14 +3,19 @@
 #define LOGAPI_H
 
 #include <iostream>
-//#include "zf_log.h"
-//#define ZF_LOGWI(...) ZF_LOGI(ZF_LOG::state, __VA_ARGS__)
-	
+#include <boost/any.hpp>
+#include <string>
+using namespace std;
 namespace ZF_LOG
 {
+	enum Type { Info, Function, Input, Output, Debug, Error, Warn, Buffer };
 	void log_init(char* file_name);
 	void setfmt(int count, ...);
-	void writelog(int count, ...);
+	//void writelog(int count, ...);
+	//void writelog(Type type, string str);
+	void writelog(int line, const char* file, Type type, const char* cc);
+	void writelog(int, const char*, Type type, vector<boost::any>&& some_values);
+	void writelog(int line, const char* file, Type type, void* buf, uint32_t size);
 	void write_to_file(char* src, uint32_t buflen);
 	void write_to_file_test(char* src, uint32_t buflen, const char* dst_plate);
 	void file_output_close(void);

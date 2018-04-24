@@ -4,7 +4,7 @@
 #include <string>
 #include <climits>
 #define LINE_MAX_CHAR_NUM 1000
-#define MEMBER_COUNT_OF_LOGBINFILE 13 
+#define MEMBER_COUNT_OF_LOGBINFILE 9
 #define MAX_MEMORY_CONTENT 1000000
 using namespace std;
 char* ZF_LOG::ReadLog::memory_src = NULL;
@@ -54,56 +54,16 @@ char* ZF_LOG::read_memory(const ReadType& rtp, int& size)
 		if (ZF_LOG::log_file_name[file_index] == 0)
 			cout << "can not open file!" << endl;
 		else
-		{
 			cout << "no file Specified, use default" << endl;
-			//#if defined (_WIN32) || defined (_WIN64)
-			//	char* log_file_name_rev = strrev(ZF_LOG::log_file_name);
-			//	string tmp;
-			//	for (int i = 0; i < strlen(log_file_name_rev); ++i)
-			//	{
-			//		if (log_file_name_rev[i] != '\\')
-			//			continue;
-			//		else
-			//		{
-			//			for (int j = i; j < strlen(log_file_name_rev); ++j)
-			//			{
-			//				tmp.push_back(log_file_name_rev[j]);
-			//			}
-			//		}
-			//	}
-			//	reverse(tmp.begin(), tmp.end());
-			//	cout << tmp;
-			//	for (int i = 0; i < tmp.size(); ++i)
-			//		zlog_path[i] = tmp[i];
-			//#else
-			//	char* log_file_name_rev = strrev(ZF_LOG::log_file_name);
-			//	string tmp;
-			//	for (int i = 0; i < strlen(log_file_name_rev); ++i)
-			//	{
-			//		if (log_file_name_rev[i] == '/')
-			//			break;
-			//		else
-			//		{
-			//			for (int j = i; j < strlen(log_file_name_rev); ++j)
-			//			{
-			//				tmp.push_back(log_file_name_rev[j]);
-			//			}
-			//		}
-			//	}
-			//	reverse(tmp.begin(), tmp.end());
-			//	cout << tmp;
-			//	for (int i = 0; i < tmp.size(); ++i)
-			//		zlog_path[i] = tmp[i];
-			//#endif
-		}
 	}
 	while (ZF_LOG::zlog_path[file_index] != 0)
 	{
 		str.push_back(ZF_LOG::zlog_path[file_index++]);
 	}
-	if (rtp.month.empty())
+	if (rtp.filename.empty())
 		return 0;
-	string month, day, hour, minute, second, millonsec;
+	str += rtp.filename;
+	/*string month, day, hour, minute, second, millonsec;
 	for (int i = 0; i < rtp.month.size(); ++i)
 	{
 		if (rtp.month[i] == '0' && month.empty())
@@ -162,7 +122,7 @@ char* ZF_LOG::read_memory(const ReadType& rtp, int& size)
 	for (int i = 0; i < rtp.rand.size(); ++i)
 	{
 		str.push_back(rtp.rand[i]);
-	}
+	}*/
 	char file_name[100];
 	int index = 0;
 	while (str[index] != 0)
@@ -200,13 +160,6 @@ ZF_LOG::ReadType ZF_LOG::read_next()
 		cout << "file is not open";
 		return temp;
 	}
-	//if (!readfile)
-	//{
-	//	for (int i = 0; i < 100; i++) {
-	//		printf("close the file..................................\n");
-	//	}
-	//	readfile.close();
-	//}
 	if (readfile.is_open())
 	{
 		cout << "111" << endl;
@@ -222,7 +175,7 @@ ZF_LOG::ReadType ZF_LOG::read_next()
 	if (readfile.peek() == EOF)
 	{
 		for (int i = 0; i < 100; i++) {
-			printf("come to eof, exit, you get nothing\n");
+			printf("come to eof, exit\n");
 		}
 		readfile.close();
 		return temp;
@@ -236,13 +189,7 @@ ZF_LOG::ReadType ZF_LOG::read_next()
 			break;
 	}
 		
-	//readfile.getline(line, LINE_MAX_CHAR_NUM);
-
-
-
-
-
-	typedef enum { MONTH, DAY, HOUR, MINUTE, SECOND, MILLSECOND, PROCESS, RANDNUM, DEBUG_INFO, FUNC_NAME, FUNC_FILE, LINE} Logbinfile_Member;
+	typedef enum { MONTH, DAY, HOUR, MINUTE, SECOND, MILLSECOND, LINE, DEBUG_INFO, FUNC_NAME } Logbinfile_Member;
 	bool flag[MEMBER_COUNT_OF_LOGBINFILE + 1];	
 	for (int i = 0; i < MEMBER_COUNT_OF_LOGBINFILE + 1; ++i)
 		flag[i] = true;
@@ -251,171 +198,129 @@ ZF_LOG::ReadType ZF_LOG::read_next()
 	/*
 	* 将line数组中的数据写入到 ReadType 对象中
 	*/
-	while (line[line_index] != '\0')		//未达到字符串结尾
+	line_index++;
+	while (line[line_index] != '-')
+		temp.month.push_back(line[line_index++]);
+	line_index++;
+	while (line[line_index] != ' ')
+		temp.day.push_back(line[line_index++]);
+	line_index++;
+	while (line[line_index] != ':')
+		temp.hour.push_back(line[line_index++]);
+	line_index++;
+	while (line[line_index] != ':')
+		temp.minute.push_back(line[line_index++]);
+	line_index++;
+	while (line[line_index] != '.')
+		temp.second.push_back(line[line_index++]);
+	line_index++;
+	while (line[line_index] != ']')
+		temp.millonsec.push_back(line[line_index++]);
+	line_index++;
+	while (line[line_index++] != ':')
+		continue;
+	while (line[line_index] != ']')
+		temp.line.push_back(line[line_index++]);
+	line_index++;
+	while (line[line_index++] == ' ')
+		continue;
+	line_index--;
+	while (line[line_index] != ' ')
+		temp.func_name.push_back(line[line_index++]);
+	line_index++;
+	while (line[line_index++] == ' ')
+		continue;
+	line_index--;
+	while (line[line_index] != ' ')
+		temp.debug_info.push_back(line[line_index++]);
+	line_index++;
+	while (line[line_index] == ' ')
 	{
-		while (line[line_index] != ' ')
-		{
-			if (temp.month.empty() || flag[Logbinfile_Member::MONTH])
-			{
-				if (line[line_index] == '-')
-				{
-					flag[Logbinfile_Member::MONTH] = false;
-					line_index++;
-					continue;
-				}
-				temp.month.push_back(line[line_index++]);
-				continue;
-			}
-
-			if (temp.day.empty() || flag[Logbinfile_Member::DAY])
-			{
-				temp.day.push_back(line[line_index++]);
-				continue;
-			}
-
-			if (temp.hour.empty() || flag[Logbinfile_Member::HOUR])
-			{
-				if (line[line_index] == ':')
-				{
-					flag[Logbinfile_Member::HOUR] = false;
-					line_index++;
-					flag_index++;
-					continue;
-				}
-				temp.hour.push_back(line[line_index++]);
-				continue;
-			}
-
-			if (temp.minute.empty() || flag[Logbinfile_Member::MINUTE])
-			{
-				if (line[line_index] == ':')
-				{
-					flag[Logbinfile_Member::MINUTE] = false;
-					line_index++;
-					flag_index++;
-					continue;
-				}
-				temp.minute.push_back(line[line_index++]);
-				continue;
-			}
-
-			if (temp.second.empty() || flag[Logbinfile_Member::SECOND])
-			{
-				if (line[line_index] == '.')
-				{
-					flag[Logbinfile_Member::SECOND] = false;
-					line_index++;
-					flag_index++;
-					continue;
-				}
-				temp.second.push_back(line[line_index++]);
-				continue;
-			}
-
-			if (temp.millonsec.empty() || flag[Logbinfile_Member::MILLSECOND])
-			{
-				temp.millonsec.push_back(line[line_index++]);
-				continue;
-			}
-
-			if (temp.process.empty() || flag[Logbinfile_Member::PROCESS])
-			{
-				temp.process.push_back(line[line_index++]);
-				continue;
-			}
-
-			if (temp.rand.empty() || flag[Logbinfile_Member::RANDNUM])
-			{
-				temp.rand.push_back(line[line_index++]);
-				continue;
-			}
-
-			if (flag[Logbinfile_Member::DEBUG_INFO])
-			{
-				temp.debug_info = line[line_index++];
-				continue;
-			}
-
-			if (temp.func_name.empty() || flag[Logbinfile_Member::FUNC_NAME])
-			{
-				if (line[line_index] == '@')
-				{
-					flag[Logbinfile_Member::FUNC_NAME] = false;
-					line_index++;
-					flag_index++;
-					continue;
-				}
-				temp.func_name.push_back(line[line_index++]);
-				continue;
-			}
-
-			if (temp.func_file.empty() || flag[Logbinfile_Member::FUNC_FILE])
-			{
-				if (line[line_index] == ':')
-				{
-					flag[Logbinfile_Member::FUNC_FILE] = false;
-					line_index++;
-					flag_index++;
-					continue;
-				}
-				temp.func_file.push_back(line[line_index++]);
-				continue;
-			}
-
-			if (temp.line.empty() || flag[Logbinfile_Member::LINE])
-			{
-				temp.line.push_back(line[line_index++]);
-				continue;
-			}
-			//if (temp.randnum.empty() || flag[Logbinfile_Member::LINE])
-			//{
-			//	temp.randnum.push_back(line[line_index++]);
-			//	continue;
-			//}
-
-		}
-		if (line_index > 1 && line[line_index - 1] == ' ')    //多个空格连起来时，跳过
-		{
-			line_index++;
-			continue;
-		}
 		line_index++;
-		flag[flag_index++] = false;
-		if (flag_index == MEMBER_COUNT_OF_LOGBINFILE-1)		//除 param 中内容，其余部分已经全部读取
+	}
+	string str;
+	vector<boost::any> vec;
+	while (line[line_index] != '\n')
+	{
+		if (-1 != temp.debug_info.find("buffer"))
 		{
-			string rest_str;
-			int backspace_num = 0;
-			for (int j = line_index; line[j] != 0; ++j)
+			string buf, siz, fi;
+			while (line[line_index] != ':')
+				buf.push_back(line[line_index++]);
+			while (line[line_index++] != ',')
+				continue;
+			line_index++;
+			while (line[line_index] != ':')
+				siz.push_back(line[line_index++]);
+			while (line[line_index++] != ',')
+				continue;
+			line_index++;
+			while (line[line_index] != ';')
+				fi.push_back(line[line_index++]);
+			temp.buffer = buf;
+			temp.size = siz;
+			temp.filename = fi;
+			return temp;
+		}
+		if (-1 != temp.debug_info.find("function") || -1 != temp.debug_info.find("info") || -1 != temp.debug_info.find("warn") || -1 != temp.debug_info.find("debug") || -1 != temp.debug_info.find("error"))
+		{
+			str.push_back(line[line_index]);
+			line_index++;
+		}
+		if (temp.debug_info.find("input")!=-1 || temp.debug_info.find("output")!=-1)
+		{
+			if (line[line_index] != ':')
+				str.push_back(line[line_index]);
+			else
 			{
-				if (line[j] == '#')
-					backspace_num++;
-				rest_str.push_back(line[j]);
-			}
-			
-			//#作为参数分隔符，便于读取
-			for (int m = 0; m < backspace_num; ++m)
-			{
-				while (line[line_index] != 0)
+				string tp;
+				while (line[line_index] != ',')
 				{
-					if (line[line_index] == ',')
-					{
-						line_index++;
-						continue;
-					}
-					if (line[line_index] == '#')
-					{
-						line_index++;
-						m++;
-						continue;
-					}
-					temp.param[m-1].push_back(line[line_index]);
+					tp.push_back(line[line_index]);
 					line_index++;
 				}
+				if (-1 != tp.find("char"))
+				{
+					vec.push_back(char(str[0]));
+					str.clear();
+				}
+				else if (-1 != tp.find("int"))
+				{
+					vec.push_back(stoi(str));
+					str.clear();
+				}
+				else if (-1 != tp.find("double"))
+				{
+					vec.push_back(stod(str));
+					str.clear();
+				}
+				else if (-1 != tp.find("bool"))
+				{
+					if(-1 != str.find("true"))
+					{
+						vec.push_back(bool(true));
+						str.clear();
+					}
+					else if (-1 != str.find("false"))
+					{
+						vec.push_back(bool(false));
+						str.clear();
+					}
+				}
+				else if (-1 != tp.find("string"))
+				{
+					vec.push_back(str);
+					str.clear();
+				}
+				else (-1 != tp.find("void*"));
 			}
+			line_index++;
 		}
 	}
-	//if (temp.day.size() == 0)
-	//	readfile.close();
-
+	if (-1 != temp.debug_info.find("function") || -1 != temp.debug_info.find("info") || -1 != temp.debug_info.find("warn") || -1 != temp.debug_info.find("debug") || -1 != temp.debug_info.find("error"))
+	{
+		vec.push_back(str);
+	}
+	temp.param = vec;
 	return temp;
 }

@@ -22,5 +22,11 @@ set(
     ${PROJECT_DIR}/include
 )
 # add target include
-target_link_libraries( ${L_PROJECT_NAME} PUBLIC ${LIB_DEPENDENCES} )
-target_include_directories( ${L_PROJECT_NAME} PUBLIC ${INCLUDE_DIRS} )
+
+set(Boost_USE_STATIC_LIBS        ON) # only find static libs
+set(Boost_USE_MULTITHREADED      ON)
+set(Boost_USE_STATIC_RUNTIME    OFF)
+find_package(Boost 1.67.0 COMPONENTS date_time filesystem system)
+
+target_link_libraries( ${L_PROJECT_NAME} PUBLIC ${LIB_DEPENDENCES} ${Boost_LIBRARIES} )
+target_include_directories( ${L_PROJECT_NAME} PUBLIC ${INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} )
