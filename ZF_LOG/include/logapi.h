@@ -15,8 +15,8 @@ namespace ZF_LOG
 	void write_to_file_test(char* src, uint32_t buflen, const char* dst_plate);
 	void file_output_close(void);
 	extern FILE * g_log_file;
-	extern char log_file_name[100];
-	extern char zlog_path[100];
+	extern char log_file_name[_MAX_FNAME];
+	extern char zlog_path[_MAX_DIR];
 }
 
 #endif

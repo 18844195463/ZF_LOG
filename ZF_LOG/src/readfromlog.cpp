@@ -3,10 +3,8 @@
 #include "zf_log.h"
 #include <fstream>
 #include <string>
-#include <climits>
 #include "logapi.h"
 #define LINE_MAX_CHAR_NUM 1000
-#define MEMBER_COUNT_OF_LOGBINFILE 9
 #define MAX_MEMORY_CONTENT 1000000
 using namespace std;
 char* ZF_LOG::ReadLog::memory_src = NULL;
@@ -15,7 +13,7 @@ ZF_LOG::ReadLog::ReadLog()
 {
 	if (!ZF_LOG::log_file_name)
 	{
-		std::cout << "no file to read";
+		std::cout << "no file to read， please first use \"zf_log_init\" method";
 		return;
 	}
 	strcpy(file_name, ZF_LOG::log_file_name);
@@ -50,93 +48,16 @@ char* ZF_LOG::read_memory(const ZF_LOG::ReadType& rtp, int& size)
 	}
 	ZF_LOG::ReadLog::memory_src = new char[MAX_MEMORY_CONTENT];
 	string str;
-	int file_index = 0;
-	if (ZF_LOG::zlog_path[file_index] == 0)
-	{
-		if (ZF_LOG::log_file_name[file_index] == 0)
-			cout << "can not open file!" << endl;
-		else
-			cout << "no file Specified, use default" << endl;
-	}
-	while (ZF_LOG::zlog_path[file_index] != 0)
-	{
-		str.push_back(ZF_LOG::zlog_path[file_index++]);
-	}
+	str += string(ZF_LOG::zlog_path);
 	if (rtp.filename.empty())
+	{
+		cout << "no buffer to read" << endl;
 		return 0;
+	}
 	str += rtp.filename;
-	/*string month, day, hour, minute, second, millonsec;
-	for (int i = 0; i < rtp.month.size(); ++i)
-	{
-		if (rtp.month[i] == '0' && month.empty())
-		{
-			continue;
-		}
-		month.push_back(rtp.month[i]);
-		str.push_back(rtp.month[i]);
-	}
-	for (int i = 0; i < rtp.day.size(); ++i)
-	{
-		if (rtp.day[i] == '0' && day.empty())
-		{
-			i++;
-			continue;
-		}
-		day.push_back(rtp.day[i]);
-		str.push_back(rtp.day[i]);
-	}
-	for (int i = 0; i < rtp.hour.size(); ++i)
-	{
-		if (rtp.hour[i] == '0' && hour.empty())
-		{
-			continue;
-		}
-		hour.push_back(rtp.hour[i]);
-		str.push_back(rtp.hour[i]);
-	}
-	for (int i = 0; i < rtp.minute.size(); ++i)
-	{
-		if (rtp.minute[i] == '0' && minute.empty())
-		{
-			continue;
-		}
-		minute.push_back(rtp.minute[i]);
-		str.push_back(rtp.minute[i]);
-	}
-	for (int i = 0; i < rtp.second.size(); ++i)
-	{
-		if (rtp.second[i] == '0' && second.empty())
-		{
-			continue;
-		}
-		second.push_back(rtp.second[i]);
-		str.push_back(rtp.second[i]);
-	}
-	for (int i = 0; i < rtp.millonsec.size(); ++i)
-	{
-		if (rtp.millonsec[i] == '0' && millonsec.empty())
-		{
-			continue;
-		}
-		millonsec.push_back(rtp.millonsec[i]);
-		str.push_back(rtp.millonsec[i]);
-	}
-	for (int i = 0; i < rtp.rand.size(); ++i)
-	{
-		str.push_back(rtp.rand[i]);
-	}*/
-	char file_name[100];
-	int index = 0;
-	while (str[index] != 0)
-	{
-		file_name[index] = str[index];
-		index++;
-	}
-	file_name[index] = 0;
-
 	int file_Length = 0;
 	ifstream read__file;
-	read__file.open(file_name, ios::in | ios::binary);
+	read__file.open(str.c_str(), ios::in | ios::binary);
 	if (!(read__file && read__file.is_open()))
 	{
 		cout << "file is not open!" << endl;
@@ -150,7 +71,7 @@ char* ZF_LOG::read_memory(const ZF_LOG::ReadType& rtp, int& size)
 		file_Length++;
 	}
 	read__file.close();
-	size = file_Length;
+	size = file_Length-1;
 	return ZF_LOG::ReadLog::memory_src;
 }
 
@@ -161,10 +82,6 @@ ZF_LOG::ReadType ZF_LOG::read_next()
 	{
 		cout << "file is not open";
 		return temp;
-	}
-	if (readfile.is_open())
-	{
-		cout << "111" << endl;
 	}
 	if (readfile.eof())
 	{
@@ -190,13 +107,7 @@ ZF_LOG::ReadType ZF_LOG::read_next()
 		if((line[index++] = readfile.get()) == '\n')
 			break;
 	}
-		
-	typedef enum { MONTH, DAY, HOUR, MINUTE, SECOND, MILLSECOND, LINE, DEBUG_INFO, FUNC_NAME } Logbinfile_Member;
-	bool flag[MEMBER_COUNT_OF_LOGBINFILE + 1];	
-	for (int i = 0; i < MEMBER_COUNT_OF_LOGBINFILE + 1; ++i)
-		flag[i] = true;
-	int line_index = 0;						//单行索引，指示line中第line_index个数据， 操作读取的每行数据
-	int flag_index = 1;						//flag标志位索引
+	int line_index = 0;						//单行索引，指示line中第line_index个数据， 操作读取的每行数据	
 	/*
 	* 将line数组中的数据写入到 ReadType 对象中
 	*/

@@ -32,15 +32,7 @@ void ZF_LOG::writelog(int line, const char* file, Type type, const char* str)
 		lines += "[warn]:      ";
 	lines += str;
 	lines.push_back('\n');
-	char aline[MAX_STRING_SIZE_ALL] = { 0 };
-	int help = 0;
-	while (!lines.empty())
-	{
-		aline[help++] = lines.back();
-		lines.pop_back();
-	}
-	strrev(aline);
-	fwrite(aline, sizeof(char), help, g_log_file);
+	fwrite(lines.c_str(), sizeof(char), lines.size(), g_log_file);
 	fflush(g_log_file);
 }
 void ZF_LOG::writelog(int line, const char* file, ZF_LOG::Type type, void* buf, uint32_t size)
@@ -50,7 +42,9 @@ void ZF_LOG::writelog(int line, const char* file, ZF_LOG::Type type, void* buf, 
 	lines += "    ";
 	if (type == ZF_LOG::Type::Buffer)
 		lines += "[buffer]:    ";
-	lines += to_string(reinterpret_cast<int>(buf));
+	std::ostringstream ostr;
+	ostr << "0x" << buf;
+	lines += ostr.str();
 	lines += ":buffer, ";
 	lines += to_string(size);
 	lines += ":size, ";
@@ -76,15 +70,7 @@ void ZF_LOG::writelog(int line, const char* file, ZF_LOG::Type type, void* buf, 
 	lines += fname;
 	lines += ";filename";
 	lines.push_back('\n');
-	char aline[MAX_STRING_SIZE_ALL] = { 0 };
-	int help = 0;
-	while (!lines.empty())
-	{
-		aline[help++] = lines.back();
-		lines.pop_back();
-	}
-	strrev(aline);
-	fwrite(aline, sizeof(char), help, g_log_file);
+	fwrite(lines.c_str(), sizeof(char), lines.size(), g_log_file);
 	fflush(g_log_file);
 }
 void ZF_LOG::writelog(int line, const char* file, Type type, vector<boost::any>&& params)
@@ -102,7 +88,6 @@ void ZF_LOG::writelog(int line, const char* file, Type type, vector<boost::any>&
 		{
 			if (val.type() == typeid(int) || val.type() == typeid(unsigned __int64) || val.type() == typeid(unsigned int) || val.type() == typeid(__int64))
 			{
-				int help;
 				//assert(v, a, c == log_read([4 - 23 15:31 : 19.866]).param[0], )
 				if (val.type() == typeid(unsigned __int64))
 					lines = lines + to_string(boost::any_cast<unsigned __int64>(val));
@@ -175,17 +160,9 @@ void ZF_LOG::writelog(int line, const char* file, Type type, vector<boost::any>&
 		}
 	}
 	lines.push_back('\n');
-	char aline[MAX_STRING_SIZE_ALL] = { 0 };
-	int help = 0;
-	while (!lines.empty())
-	{
-		aline[help++] = lines.back();
-		lines.pop_back();
-	}
-	strrev(aline);
 	if (!g_log_file)
 		cout << "cannot open the file!";
-	fwrite(aline, sizeof(char), help, g_log_file);
+	fwrite(lines.c_str(), sizeof(char), lines.size(), g_log_file);
 	fflush(g_log_file);
 }
 
@@ -195,82 +172,19 @@ void ZF_LOG::write_to_file(char* src, uint32_t buflen)
 	int filerand = __FILERAND__;
 	void* buf = src;
 	zf_write_log(ZF_LOG::Type::Buffer, buf, buflen );
-	char file_name[FILENAME_MAX] = { 0 };
-	strcat(file_name, ZF_LOG::zlog_path);
-
-	char month[20];
-	char day[20];
-	char hour[20];
-	char minute[20];
-	char second[20];
-	char wsecond[20];
-
-#if defined(_WIN32) || defined(_WIN64)
-	sprintf(month, "%hu", ZF_LOG::tm.month);
-	sprintf(day, "%hu", ZF_LOG::tm.day);
-	sprintf(hour, "%hu", ZF_LOG::tm.hour);
-	sprintf(minute, "%hu", ZF_LOG::tm.minute);
-	sprintf(second, "%hu", ZF_LOG::tm.second);
-	sprintf(wsecond, "%hu", ZF_LOG::tm.millisecond);
-	strcat(file_name, month);
-	strcat(file_name, day);
-	strcat(file_name, hour);
-	strcat(file_name, minute);
-	strcat(file_name, second);
-	strcat(file_name, wsecond);
-	char str[100];
-	int index = 0;
-	while (filerand > 0)
-	{
-		str[index++] = filerand %10+48;
-		filerand = filerand / 10;
-	}
-	str[index] = 0;
-	strrev(str);
-	strcat(file_name, str);
-	
-#else // unix like system
-	struct timeval tv;
-	gettimeofday(&tv, 0);
-	struct tm tm;
-
-	if (!tcache_get(&tv, &tm))
-	{
-		localtime_r(&tv.tv_sec, &tm);
-		tcache_set(&tv, &tm);
-	}
-
-	sprintf(month, "%hu", tm.tm_mon);
-	sprintf(hour, "%hu", tm.tm_mday);
-	sprintf(hour, "%hu", tm.tm_hour);
-	sprintf(minute, "%hu", tm.tm_min);
-	sprintf(second, "%hu", tm.tm_sec);
-	sprintf(wsecond, "%hu", (unsigned)tv.tv_usec / 1000);
-	strcat(file_name, month);
-	strcat(file_name, day);
-	strcat(file_name, hour);
-	strcat(file_name, minute);
-	//strcat(file_name, second);
-	//strcat(file_name, wsecond);
-	char str[100];
-	int index = 0;
-	while (filerand > 1)
-	{
-		str[index++] = filerand % 10;
-		filerand = filerand % 10;
-	}
-	str[index] = 0;
-	strrev(str);
-	strcat(file_name, str);
-#endif
-
-	/*FILE *fp;*/
-	//if ((fp = fopen(file_name, "w")) == NULL) {
-	//	printf("File cannot be opened\n");
-	//	//exit(0);
-	//}
-	//else
-	//	printf("File opened for writing\n");
+	string fname;
+	if (!ZF_LOG::zlog_path)
+		fname = "./";
+	else
+		fname = string(ZF_LOG::zlog_path);
+	fname += to_string(ZF_LOG::tm.month);
+	fname += to_string(ZF_LOG::tm.day);
+	fname += to_string(ZF_LOG::tm.hour);
+	fname += to_string(ZF_LOG::tm.minute);
+	fname += to_string(ZF_LOG::tm.second);
+	fname += to_string(ZF_LOG::tm.millisecond);
+	fname += to_string(filerand);
+	const char* file_name = fname.c_str();
 	ofstream wfile;
 	wfile.open(file_name, ios::out | ios::binary);
 	if (!(wfile && wfile.is_open()))
@@ -280,95 +194,26 @@ void ZF_LOG::write_to_file(char* src, uint32_t buflen)
 	}
 	char* ptr = src;
 	wfile.write(ptr, buflen);
-	//for(int i = 0; i < buflen; ++i)
-	//	fprintf(fp, "%c", (unsigned char)ptr[i]);
-	//fflush(fp);
-	//for (size_t i = 0; i < buflen; i += 64)
-	//{
-	//	for (size_t j = 0; j < 64; ++j)
-	//	{
-	//		if (i + j < buflen)
-	//		{
-	//			fprintf(fp, "%c", (unsigned char)ptr[i + j]);
-	//		}
-	//	}
-	//	fflush(fp);
-	//}
-	//fclose(fp);
 	wfile.close();
 }
 void ZF_LOG::write_to_file_test(char* src, uint32_t buflen, const char* dst_plate)
 {
 	int filerand = __FILERAND__;
-
-	char file_name[FILENAME_MAX] = { 0 };
-	strcat(file_name, dst_plate);
-
-	char month[20];
-	char day[20];
-	char hour[20];
-	char minute[20];
-	char second[20];
-	char wsecond[20];
-
-#if defined(_WIN32) || defined(_WIN64)
-	sprintf(month, "%hu", ZF_LOG::tm.month);
-	sprintf(day, "%hu", ZF_LOG::tm.day);
-	sprintf(hour, "%hu", ZF_LOG::tm.hour);
-	sprintf(minute, "%hu", ZF_LOG::tm.minute);
-	sprintf(second, "%hu", ZF_LOG::tm.second);
-	sprintf(wsecond, "%hu", ZF_LOG::tm.millisecond);
-	strcat(file_name, month);
-	strcat(file_name, day);
-	strcat(file_name, hour);
-	strcat(file_name, minute);
-	strcat(file_name, second);
-	strcat(file_name, wsecond);
-	char str[100];
-	int index = 0;
-	while (filerand > 0)
-	{
-		str[index++] = filerand % 10 + 48;
-		filerand = filerand / 10;
-	}
-	str[index] = 0;
-	strrev(str);
-	strcat(file_name, str);
-
-#else // unix like system
-	struct timeval tv;
-	gettimeofday(&tv, 0);
-	struct tm tm;
-
-	if (!tcache_get(&tv, &tm))
-	{
-		localtime_r(&tv.tv_sec, &tm);
-		tcache_set(&tv, &tm);
-	}
-
-	sprintf(month, "%hu", tm.tm_mon);
-	sprintf(hour, "%hu", tm.tm_mday);
-	sprintf(hour, "%hu", tm.tm_hour);
-	sprintf(minute, "%hu", tm.tm_min);
-	sprintf(second, "%hu", tm.tm_sec);
-	sprintf(wsecond, "%hu", (unsigned)tv.tv_usec / 1000);
-	strcat(file_name, month);
-	strcat(file_name, day);
-	strcat(file_name, hour);
-	strcat(file_name, minute);
-	//strcat(file_name, second);
-	//strcat(file_name, wsecond);
-	char str[100];
-	int index = 0;
-	while (filerand > 1)
-	{
-		str[index++] = filerand % 10;
-		filerand = filerand % 10;
-	}
-	str[index] = 0;
-	strrev(str);
-	strcat(file_name, str);
-#endif
+	void* buf = src;
+	zf_write_log(ZF_LOG::Type::Buffer, buf, buflen);
+	string fname;
+	if (!dst_plate)
+		printf("a dictionary is needed");
+	else
+		fname = string(dst_plate);
+	fname += to_string(ZF_LOG::tm.month);
+	fname += to_string(ZF_LOG::tm.day);
+	fname += to_string(ZF_LOG::tm.hour);
+	fname += to_string(ZF_LOG::tm.minute);
+	fname += to_string(ZF_LOG::tm.second);
+	fname += to_string(ZF_LOG::tm.millisecond);
+	fname += to_string(filerand);
+	const char* file_name = fname.c_str();
 	ofstream wfile;
 	wfile.open(file_name, ios::out | ios::binary);
 	if (!(wfile && wfile.is_open()))

@@ -63,7 +63,7 @@ void union_string(int line, const char* file, string& str)
 	str += temp;
 	temp.clear();
 	temp = string(file);
-	while (temp.size() < 23)
+	while (temp.size() < 33)
 		temp.push_back(' ');
 	str += temp;
 	//get_rand(str);

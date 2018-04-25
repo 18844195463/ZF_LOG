@@ -6,7 +6,6 @@
 #include <boost/any.hpp>
 #include <string>
 #include "readfromlog.h"
-using namespace std;
 #define zf_write_log( ... ) ZF_LOG::writelog( __LINE__, __FUNCTION__, __VA_ARGS__)
 namespace ZF_LOG
 {
@@ -23,6 +22,7 @@ void zf_read_init();
 char* zf_read_memory(const ZF_LOG::ReadType& rtp, int& size);
 void zf_read_uninit();
 void zf_log_uninit();
+// you must use method zf_read_uninit before zf_read_next
 ZF_LOG::ReadType zf_read_next();
 
 #endif

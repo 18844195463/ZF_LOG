@@ -6,83 +6,47 @@
 using namespace std;
 namespace ZF_LOG
 {
-	//void file_output_callback(const zf_log_message *msg, void *arg);
 	void file_output_open(const char *const log_path);
 	void file_output_close(void);
 	FILE *g_log_file;
-	char zlog_path[100] = { 0 };
-	char log_file_name[100] = { 0 };
+	/*日志路径，和内存记录文件路径一致*/
+	char zlog_path[_MAX_DIR] = { 0 }; 
+	/*日志文件名*/
+	char log_file_name[_MAX_FNAME] = { 0 }; 
 }
-//void ZF_LOG::file_output_callback(const zf_log_message *msg, void *arg)
-//{
-//	(void)arg;
-//	*msg->p = '\n';
-//	fwrite(msg->buf, msg->p - msg->buf + 1, 1, g_log_file);
-//	fflush(g_log_file);
-//}
 
 void ZF_LOG::file_output_close(void)
 {
-	fclose(g_log_file);
+	if (g_log_file)
+	{
+		printf("close the file %s", log_file_name);
+		fclose(g_log_file);
+	}
+	memset(zlog_path, 0, strlen(zlog_path));
+	memset(log_file_name, 0, strlen(log_file_name));
 }
-
 
 void ZF_LOG::file_output_open(const char *const log_path)
 {
-	g_log_file = fopen(log_path, "a");
+	char path[_MAX_DIR + _MAX_FNAME] = { 0 };
+	if(!log_path)
+		strcpy(path, "./log.txt");
+	else
+		strcpy(path, log_path);
+	g_log_file = fopen(path, "a");
 	if (!g_log_file)
 	{
-		//ZF_LOGW("Failed to open log file %s", log_path);
+		printf("fail to open the file: %s", path);
 		return;
 	}
-	strcpy(log_file_name, log_path);
-#if defined (_WIN32) || defined (_WIN64)
-	
-	char* log_file_name_rev = log_file_name;
-	strrev(log_file_name_rev);
-	string tmp;
-	bool help = true;
-	for (int i = 0; i <= strlen(log_file_name_rev); ++i)
-	{
-		if (log_file_name_rev[i] != '\\' && help)
-		{
-			continue;
-		}
-		help = false;
-			for (int j = i; j <= strlen(log_file_name_rev); ++j)
-			{
-				tmp.push_back(log_file_name_rev[j]);
-			}
-			break;
-	}
-	reverse(tmp.begin(), tmp.end());
-	for (int i = 0; i < tmp.size()-1; ++i)
-		zlog_path[i] = tmp[i+1];
-	strrev(log_file_name_rev);
-#else
-	char* log_file_name_rev = log_file_name;
-	strrev(log_file_name_rev);
-	string tmp;
-	for (int i = 0; i < strlen(log_file_name_rev); ++i)
-	{
-		if (log_file_name_rev[i] == '/')
-			break;
-		else
-		{
-			for (int j = i; j < strlen(log_file_name_rev); ++j)
-			{
-				tmp.push_back(log_file_name_rev[j]);
-			}
-		}
-	}
-	reverse(tmp.begin(), tmp.end());
-	cout << tmp;
-	for (int i = 0; i < tmp.size(); ++i)
-		zlog_path[i] = tmp[i];
-	strrev(log_file_name_rev);
-#endif
+	strcpy(log_file_name, path);
+	string temp(path);
+	char c;
+	while ((c = temp[temp.size() - 1]) != '/' && c != '\\')
+		temp.pop_back();
+	for (int i = 0; i < temp.size(); ++i)
+		zlog_path[i] = temp[i];
 	atexit(file_output_close);
-
 }
 
 void ZF_LOG::log_init(char* file_name)
