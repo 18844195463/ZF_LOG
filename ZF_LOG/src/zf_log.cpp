@@ -2,21 +2,21 @@
 #include "datatype.h"
 #include "logapi.h"
 
-void zf_log_init(char* file_name)
+bool zf_log_init(string file_name)
 {
-	ZF_LOG::log_init(file_name);
+	return ZF_LOG::log_init(file_name);
 }
-void zf_write_to_file(char* src, uint32_t buflen)
+bool zf_write_to_file(char* src, uint32_t buflen)
 {
-	ZF_LOG::write_to_file(src, buflen);
+	return ZF_LOG::write_to_file(src, buflen);
 }
-void zf_write_to_file_test(char* src, uint32_t buflen, const char* dst_plate)
+bool zf_write_to_file_test(char* src, uint32_t buflen, const string& dst_plate)
 {
-	ZF_LOG::write_to_file_test(src, buflen, dst_plate);
+	return ZF_LOG::write_to_file_test(src, buflen, dst_plate);
 }
-void zf_read_init()
+bool zf_read_init()
 {
-	ZF_LOG::read_init();
+	return ZF_LOG::read_init();
 }
 char* zf_read_memory(const ZF_LOG::ReadType& rtp, int& size)
 {

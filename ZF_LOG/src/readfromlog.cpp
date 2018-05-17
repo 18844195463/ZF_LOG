@@ -18,14 +18,16 @@ ZF_LOG::ReadLog::ReadLog()
 	}
 	strcpy(file_name, ZF_LOG::log_file_name);
 }
-void ZF_LOG::read_init()
+bool ZF_LOG::read_init()
 {
 	ZF_LOG::ReadLog readlog;
 	readfile.open(readlog.file_name, ios::in);
 	if (!readfile.is_open())
 	{
 		printf("cannot open the file %s", readlog.file_name);
+		return false;
 	}
+	return true;
 	//readfile.close();
 }
 void ZF_LOG::ReadLog::read_log()
@@ -81,12 +83,16 @@ ZF_LOG::ReadType ZF_LOG::read_next()
 	if (!(readfile.is_open()))
 	{
 		cout << "file is not open";
+		if(is_logfile_open())
+			zf_write_log(ZF_LOG::Error, "please use method read_init() before read_next()");
 		return temp;
 	}
 	if (readfile.eof())
 	{
 		for (int i = 0; i < 100; i++) {
 			printf("come to eof, exit, you get nothing\n");
+			if (is_logfile_open())
+				zf_write_log(ZF_LOG::Info, "come to eof, exit!");
 		}
 		readfile.close();
 		return temp;
@@ -95,6 +101,8 @@ ZF_LOG::ReadType ZF_LOG::read_next()
 	{
 		for (int i = 0; i < 100; i++) {
 			printf("come to eof, exit\n");
+			if (is_logfile_open())
+				zf_write_log(ZF_LOG::Info, "come to eof, exit!");
 		}
 		readfile.close();
 		return temp;

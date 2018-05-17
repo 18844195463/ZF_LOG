@@ -32,7 +32,7 @@ namespace ZF_LOG
 		char file_name[_MAX_PATH];
 		static char* memory_src;
 	};
-	void read_init();
+	bool read_init();
 	char* read_memory(const ReadType& rtp, int& size);
 	void read_uninit();
 	ReadType read_next();

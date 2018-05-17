@@ -9,10 +9,10 @@
 using namespace std;
 namespace ZF_LOG
 {
-	void log_init(char* file_name);
-
-	void write_to_file(char* src, uint32_t buflen);
-	void write_to_file_test(char* src, uint32_t buflen, const char* dst_plate);
+	bool log_init(string file_name);
+	bool is_logfile_open();
+	bool write_to_file(char* src, uint32_t buflen);
+	bool write_to_file_test(char* src, uint32_t buflen, const string& dst_plate);
 	void file_output_close(void);
 	extern FILE * g_log_file;
 	extern char log_file_name[_MAX_FNAME];
