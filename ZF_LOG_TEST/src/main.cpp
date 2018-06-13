@@ -20,7 +20,7 @@ int main()
 {
 	char *p = new char[100];
 
-	zf_log_init("E:\\mm\\log.txt");
+	zf_log_init("D:\\log.txt");
 	zf_read_init();
 	zf_write_log(ZF_LOG::Type::Function, "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
 	char* pointer = "aaa";
